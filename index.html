@@ -491,7 +491,7 @@
 
                         transaction.update(productRef, { quantity: newQuantity });
                         
-                        const historyCollectionRef = collection(db, `${productRef.path}/history`);
+                        const historyCollectionRef = collection(db, `${productRef.path}/movements`);
                         transaction.set(doc(historyCollectionRef), {
                             type, quantity, reason,
                             previousStock: currentQuantity,
