@@ -68,7 +68,6 @@
     <!-- Plantilla de la App Principal -->
     <template id="app-template">
          <div class="container mx-auto p-4 md:p-6 lg:p-8">
-            <!-- ***** INICIO DE LA CORRECCIÓN RESPONSIVA ***** -->
             <header class="mb-6">
                 <div class="flex flex-wrap justify-between items-center gap-y-2">
                     <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center">
@@ -80,7 +79,6 @@
                     </div>
                 </div>
             </header>
-            <!-- ***** FIN DE LA CORRECCIÓN RESPONSIVA ***** -->
             <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4"><div class="relative w-full md:w-1/2 lg:w-1/3"><input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto..."><i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i></div><button id="addProductBtn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center shadow-md"><i class="fas fa-plus mr-2"></i> Agregar Producto</button></div>
             <div id="loader" class="text-center py-10"><i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i><p class="mt-2">Cargando...</p></div>
             <div id="noProductsMessage" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md p-8"><i class="fas fa-box-open fa-3x text-gray-400"></i><p class="mt-4 text-xl">No hay productos en tu inventario.</p><p class="text-gray-500 dark:text-gray-400">¡Agrega tu primer producto para comenzar!</p></div>
@@ -117,9 +115,9 @@
     </template>
     
     <script type="module">
-        // Importaciones de Firebase
+        // Importaciones de Firebase (con 'limit' y 'startAfter' para paginación)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // --- PEGUE AQUÍ SU CONFIGURACIÓN DE FIREBASE ---
@@ -139,9 +137,10 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // --- Estado Global ---
+        // --- Estado Global y Constantes ---
         let productsUnsubscribe = null; // Para cancelar la escucha de productos al cerrar sesión
         let currentOpenModal = null; // Referencia al modal actualmente abierto
+        const HISTORY_PAGE_SIZE = 15; // MEJORA 3: Constante para la paginación
 
         // --- Elementos del DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -183,25 +182,21 @@
 
         onAuthStateChanged(auth, user => {
             if (user) {
-                // Si el usuario está autenticado, muestra la app
                 authContainer.style.display = 'none';
                 const appTemplate = document.getElementById('app-template').content.cloneNode(true);
-                appContainer.innerHTML = ''; // Limpia el contenedor antes de añadir
+                appContainer.innerHTML = '';
                 appContainer.appendChild(appTemplate);
                 appContainer.style.display = 'block';
-
                 appContainer.querySelector('#user-email').textContent = user.email;
                 initializeAppLogic(user.uid);
             } else {
-                // Si no hay usuario, muestra el formulario de login/registro
                 authContainer.style.display = 'flex';
                 appContainer.style.display = 'none';
                 appContainer.innerHTML = '';
-                if (productsUnsubscribe) productsUnsubscribe(); // Detiene la escucha de datos
+                if (productsUnsubscribe) productsUnsubscribe();
             }
         });
         
-        // Listeners para formularios de login/registro
         document.getElementById('show-register').addEventListener('click', e => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; });
         document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); document.getElementById('login-form').style.display = 'block'; document.getElementById('register-form').style.display = 'none'; });
         
@@ -242,6 +237,19 @@
                 case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.';
                 case 'auth/invalid-email': return 'El correo electrónico no es válido.';
                 default: return 'Ocurrió un error. Inténtalo de nuevo.';
+            }
+        }
+        
+        // MEJORA 2: Función para mensajes de error de Firestore
+        function getFirestoreErrorMessage(error) {
+            console.error("Firestore Error:", error); // Mantener el log para depuración
+            switch (error.code) {
+                case 'permission-denied':
+                    return 'No tienes permiso para realizar esta acción.';
+                case 'unavailable':
+                    return 'No se pudo conectar a la base de datos. Revisa tu conexión.';
+                default:
+                    return 'Ocurrió un error inesperado en la base de datos.';
             }
         }
 
@@ -294,7 +302,7 @@
                     <div class="flex justify-between items-start">
                         <span class="text-xs font-semibold uppercase tracking-wider text-blue-500 dark:text-blue-400">${product.category || 'Sin Categoría'}</span>
                         <div class="relative">
-                            <button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
+                            <button class="menu-button text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 py-1">
@@ -320,22 +328,26 @@
                     </div>
                 </div>
             `;
-
-            // Añadir listeners para los botones de acción
+            
             card.querySelector('.edit-btn').onclick = (e) => { e.preventDefault(); handleEdit(product, collectionRef); };
             card.querySelector('.stock-btn').onclick = (e) => { e.preventDefault(); handleStockAdjust(product, collectionRef); };
             card.querySelector('.history-btn').onclick = (e) => { e.preventDefault(); handleShowHistory(product, userId); };
             card.querySelector('.delete-btn').onclick = async (e) => { e.preventDefault(); await handleDelete(product.id, collectionRef); };
             
-            // Lógica para mostrar/ocultar el menú de acciones
-            const menuButton = card.querySelector('button');
+            // MEJORA 4: Lógica para mostrar solo un menú a la vez
+            const menuButton = card.querySelector('.menu-button');
             const actionMenu = card.querySelector('.action-menu');
             menuButton.addEventListener('click', (e) => {
                 e.stopPropagation();
+                const isVisible = actionMenu.style.display === 'block';
+                // Primero, cierra todos los demás menús abiertos
                 document.querySelectorAll('.action-menu').forEach(m => {
-                    if (m !== actionMenu) m.style.display = 'none';
+                    m.style.display = 'none';
                 });
-                actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
+                // Luego, muestra u oculta el menú actual
+                if (!isVisible) {
+                    actionMenu.style.display = 'block';
+                }
             });
 
             return card;
@@ -351,9 +363,9 @@
                 });
             };
             modalBackdrop.onclick = closeModal;
-            document.addEventListener('click', () => {
-                const openMenu = document.querySelector('.action-menu[style*="block"]');
-                if (openMenu) openMenu.style.display = 'none';
+            // Listener global para cerrar menús si se hace clic fuera
+            document.addEventListener('click', () => { 
+                document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none');
             });
         }
 
@@ -378,8 +390,8 @@
                     productsGrid.appendChild(createProductCard(product, collectionRef, userId));
                 });
             }, error => {
-                console.error("Error al escuchar productos:", error);
-                showNotification('Error al cargar los productos.');
+                // MEJORA 2: Usando el manejador de errores específico
+                showNotification(getFirestoreErrorMessage(error));
             });
         }
         
@@ -400,7 +412,7 @@
                 modal.querySelector('#productPrice').value = product.price || '';
                 modal.querySelector('#productSupplier').value = product.supplier || '';
                 modal.querySelector('#productDescription').value = product.description || '';
-                initialStockContainer.style.display = 'none'; // No se puede editar stock inicial
+                initialStockContainer.style.display = 'none';
             } else { // Modo Agregar
                 modalTitle.textContent = 'Agregar Producto';
                 initialStockContainer.style.display = 'block';
@@ -422,11 +434,11 @@
                 };
 
                 try {
-                    if (product) { // Actualizar
+                    if (product) {
                         const productRef = doc(collectionRef, product.id);
                         await updateDoc(productRef, data);
                         showNotification('Producto actualizado con éxito', 'success');
-                    } else { // Crear
+                    } else {
                         data.quantity = parseInt(modal.querySelector('#productQuantity').value) || 0;
                         data.createdAt = Timestamp.now();
                         await addDoc(collectionRef, data);
@@ -434,8 +446,8 @@
                     }
                     closeModal();
                 } catch (error) {
-                    console.error("Error guardando producto:", error);
-                    showNotification('Error al guardar el producto.');
+                    // MEJORA 2: Usando el manejador de errores específico
+                    showNotification(getFirestoreErrorMessage(error));
                 } finally {
                     setButtonLoading(button, false);
                 }
@@ -452,8 +464,8 @@
                     await deleteDoc(doc(collectionRef, productId));
                     showNotification('Producto eliminado.', 'success');
                 } catch (error) {
-                    console.error("Error eliminando producto:", error);
-                    showNotification('Error al eliminar el producto.');
+                    // MEJORA 2: Usando el manejador de errores específico
+                    showNotification(getFirestoreErrorMessage(error));
                 }
             }
         }
@@ -483,42 +495,32 @@
                     const productRef = doc(collectionRef, product.id);
                     await runTransaction(db, async (transaction) => {
                         const productDoc = await transaction.get(productRef);
-                        if (!productDoc.exists()) {
-                            throw "El documento no existe!";
-                        }
-
+                        if (!productDoc.exists()) { throw "El documento no existe!"; }
                         const currentQuantity = productDoc.data().quantity || 0;
                         let newQuantity = currentQuantity;
                         
                         if (type === 'entrada') {
                             newQuantity += quantity;
-                        } else { // salida
-                            if (currentQuantity < quantity) {
-                                throw "No hay stock suficiente para esta salida.";
-                            }
+                        } else {
+                            if (currentQuantity < quantity) { throw "No hay stock suficiente para esta salida."; }
                             newQuantity -= quantity;
                         }
 
                         transaction.update(productRef, { quantity: newQuantity });
-
-                        // Registrar en historial
+                        
                         const historyCollectionRef = collection(db, `${productRef.path}/history`);
                         transaction.set(doc(historyCollectionRef), {
-                            type,
-                            quantity,
-                            reason,
+                            type, quantity, reason,
                             previousStock: currentQuantity,
                             newStock: newQuantity,
                             date: Timestamp.now(),
                         });
                     });
-
                     showNotification('Stock actualizado con éxito.', 'success');
                     closeModal();
-
                 } catch (error) {
-                    console.error("Error en transacción de stock:", error);
-                    showNotification(typeof error === 'string' ? error : 'Error al ajustar el stock.');
+                    const errorMessage = typeof error === 'string' ? error : getFirestoreErrorMessage(error);
+                    showNotification(errorMessage);
                 } finally {
                     setButtonLoading(button, false);
                 }
@@ -527,30 +529,16 @@
             openModal(modal);
         }
 
+        // MEJORA 3: Lógica de paginación para el historial
         async function handleShowHistory(product, userId) {
             const template = document.getElementById('history-modal-template');
             const modal = template.content.cloneNode(true).firstElementChild;
             modal.querySelector('#historyProductName').textContent = product.name;
             const contentDiv = modal.querySelector('#historyContent');
-            contentDiv.innerHTML = '<i class="fas fa-spinner fa-spin fa-lg"></i>';
-
-            modal.querySelector('.cancel-btn').onclick = closeModal;
-            openModal(modal);
-
-            try {
-                const historyCollectionRef = collection(db, `users/${userId}/products/${product.id}/history`);
-                const q = query(historyCollectionRef, orderBy("date", "desc"));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    contentDiv.innerHTML = '<p>No hay movimientos registrados.</p>';
-                    return;
-                }
-                
-                contentDiv.innerHTML = '';
-                const table = document.createElement('table');
-                table.className = 'w-full text-sm text-left';
-                table.innerHTML = `
+            
+            // Crear la estructura de la tabla y el contenedor para el botón
+            contentDiv.innerHTML = `
+                <table class="w-full text-sm text-left">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <th scope="col" class="px-4 py-2">Fecha</th>
@@ -559,30 +547,68 @@
                             <th scope="col" class="px-4 py-2">Motivo</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>`;
-                
-                const tbody = table.querySelector('tbody');
-                querySnapshot.forEach(doc => {
-                    const item = doc.data();
-                    const date = item.date.toDate().toLocaleString('es-ES');
-                    const typeClass = item.type === 'entrada' ? 'text-green-500' : 'text-red-500';
-                    const typeText = item.type === 'entrada' ? 'Entrada' : 'Salida';
-                    const row = document.createElement('tr');
-                    row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
-                    row.innerHTML = `
-                        <td class="px-4 py-2">${date}</td>
-                        <td class="px-4 py-2 font-medium ${typeClass}">${typeText}</td>
-                        <td class="px-4 py-2 font-bold">${item.quantity}</td>
-                        <td class="px-4 py-2">${item.reason}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                contentDiv.appendChild(table);
+                    <tbody></tbody>
+                </table>
+                <div id="loadMoreContainer" class="mt-4 text-center"></div>
+            `;
 
-            } catch (error) {
-                console.error("Error al cargar historial:", error);
-                contentDiv.innerHTML = '<p class="text-red-500">No se pudo cargar el historial.</p>';
-            }
+            const tbody = contentDiv.querySelector('tbody');
+            const loadMoreContainer = contentDiv.querySelector('#loadMoreContainer');
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            openModal(modal);
+
+            const historyCollectionRef = collection(db, `users/${userId}/products/${product.id}/history`);
+            let lastVisibleDoc = null; // Guardará el último documento para la paginación
+
+            const loadMoreHistory = async () => {
+                loadMoreContainer.innerHTML = '<i class="fas fa-spinner fa-spin fa-lg text-blue-500"></i>';
+
+                // Construir la consulta
+                let q = query(historyCollectionRef, orderBy("date", "desc"), limit(HISTORY_PAGE_SIZE));
+                if (lastVisibleDoc) {
+                    q = query(q, startAfter(lastVisibleDoc));
+                }
+                
+                try {
+                    const querySnapshot = await getDocs(q);
+
+                    if (querySnapshot.empty && tbody.rows.length === 0) {
+                        contentDiv.innerHTML = '<p class="p-4 text-center">No hay movimientos registrados.</p>';
+                        return;
+                    }
+
+                    querySnapshot.forEach(doc => {
+                        const item = doc.data();
+                        const date = item.date.toDate().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+                        const typeClass = item.type === 'entrada' ? 'text-green-500' : 'text-red-500';
+                        const typeText = item.type === 'entrada' ? 'Entrada' : 'Salida';
+                        const row = tbody.insertRow();
+                        row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
+                        row.innerHTML = `
+                            <td class="px-4 py-2">${date}</td>
+                            <td class="px-4 py-2 font-medium ${typeClass}">${typeText}</td>
+                            <td class="px-4 py-2 font-bold">${item.quantity}</td>
+                            <td class="px-4 py-2">${item.reason}</td>
+                        `;
+                    });
+
+                    lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+                    loadMoreContainer.innerHTML = ''; // Limpiar el spinner/botón anterior
+
+                    if (querySnapshot.docs.length === HISTORY_PAGE_SIZE) {
+                        const loadMoreBtn = document.createElement('button');
+                        loadMoreBtn.textContent = 'Cargar más';
+                        loadMoreBtn.className = 'px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700';
+                        loadMoreBtn.onclick = loadMoreHistory;
+                        loadMoreContainer.appendChild(loadMoreBtn);
+                    }
+                } catch (error) {
+                    contentDiv.innerHTML = `<p class="p-4 text-center text-red-500">No se pudo cargar el historial. ${getFirestoreErrorMessage(error)}</p>`;
+                }
+            };
+            
+            // Cargar la primera página de resultados
+            await loadMoreHistory();
         }
     </script>
 </body>
