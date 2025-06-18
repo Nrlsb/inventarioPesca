@@ -162,33 +162,26 @@
             }, 3000);
         }
 
-        /**
-         * Sanitizes text to prevent XSS by replacing HTML characters.
-         * @param {string} str The string to sanitize.
-         * @returns {string} The sanitized string.
-         */
-        function sanitize(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
         // --- Authentication ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 authContainer.style.display = 'none';
+                // Only build the app UI if it's not already there
                 if (!appContainer.hasChildNodes()) {
                     const appTemplate = document.getElementById('app-template');
                     appContainer.appendChild(appTemplate.content.cloneNode(true));
+                    // Now that the template is in the DOM, we can safely initialize the app logic
+                    initializeAppLogic(user);
                 }
                 appContainer.style.display = 'block';
-                appContainer.querySelector('#user-email').textContent = user.email;
-                initializeAppLogic(user.uid);
             } else {
                 authContainer.style.display = 'flex';
                 appContainer.style.display = 'none';
-                appContainer.innerHTML = '';
-                if (productsUnsubscribe) productsUnsubscribe();
+                appContainer.innerHTML = ''; // Clean up app content on logout
+                if (productsUnsubscribe) {
+                    productsUnsubscribe();
+                    productsUnsubscribe = null;
+                }
             }
         });
         
@@ -239,9 +232,12 @@
         }
 
         // --- App Logic ---
-        function initializeAppLogic(userId) {
-            const collectionPath = `users/${userId}/products`;
+        function initializeAppLogic(user) {
+            const collectionPath = `users/${user.uid}/products`;
             const productsCollectionRef = collection(db, collectionPath);
+            
+            appContainer.querySelector('#user-email').textContent = user.email;
+
             setupAppEventListeners(productsCollectionRef);
             listenForProducts(productsCollectionRef);
         }
@@ -413,7 +409,7 @@
                         }
                         transaction.update(productRef, { quantity: newQuantity });
                         const movementRef = collection(db, productRef.path, 'movements');
-                        transaction.set(doc(movementRef), { type: form.querySelector('#movementType').value, quantityChanged, newQuantity, reason: form.querySelector('#movementReason').value, timestamp: Timestamp.now() });
+                        transaction.set(doc(movementRef), { type: form.querySelector('#movementType').value, quantityChanged: newQuantity, reason: form.querySelector('#movementReason').value, timestamp: Timestamp.now() });
                     });
                     showNotification('Stock actualizado con éxito.', 'success');
                     closeModal();
