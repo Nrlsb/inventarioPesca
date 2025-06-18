@@ -19,8 +19,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Create Firebase config file 🤫
-        run: |
-          echo "export const firebaseConfig = ${{ secrets.FIREBASE_CONFIG }};" > firebase.js
+        # Este comando ahora usa una variable de entorno, que es más seguro
+        run: echo "export const firebaseConfig = ${{ env.FIREBASE_CONFIG }};" > firebase.js
+        # Aquí definimos la variable de entorno para este paso
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
