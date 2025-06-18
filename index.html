@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventario de Pesca - App Segura</title>
+    <!-- Tailwind CSS para estilos rápidos y responsivos -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts para una tipografía limpia -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome para íconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* Estilos base y para componentes personalizados */
         body { font-family: 'Inter', sans-serif; }
         .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 40; }
         .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; }
         .action-menu { display: none; }
+        /* Mostrar menú de acciones al pasar el cursor sobre el grupo */
         .group:hover .action-menu { display: block; }
         #auth-container, #app-container { display: none; }
         .loading-spinner { border-top-color: transparent; }
@@ -20,28 +25,28 @@
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
 
-    <!-- Notification Bar -->
+    <!-- Barra de Notificaciones -->
     <div id="notification" class="notification fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 bg-red-600 text-white text-center rounded-b-lg shadow-lg opacity-0 -translate-y-full z-50">
         <p id="notification-message"></p>
     </div>
 
-    <!-- Auth Container -->
+    <!-- Contenedor de Autenticación (Login/Registro) -->
     <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
             <form id="login-form">
                 <h2 class="text-2xl font-bold text-center">Iniciar Sesión</h2>
                 <div class="mt-4 space-y-4">
-                    <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required autocomplete="email">
-                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full px-4 py-2 border rounded-lg" required autocomplete="current-password">
+                    <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required autocomplete="email">
+                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required autocomplete="current-password">
                     <button type="submit" class="w-full h-10 px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center">Ingresar</button>
                 </div>
                 <p class="mt-4 text-sm text-center">¿No tienes una cuenta? <a href="#" id="show-register" class="font-medium text-blue-600 hover:underline">Regístrate</a></p>
             </form>
-            <form id="register-form" class="hidden">
+            <form id="register-form" style="display: none;">
                  <h2 class="text-2xl font-bold text-center">Crear Cuenta</h2>
                  <div class="mt-4 space-y-4">
-                    <input type="email" id="register-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required autocomplete="email">
-                    <input type="password" id="register-password" placeholder="Contraseña (mín. 6 caracteres)" class="w-full px-4 py-2 border rounded-lg" required autocomplete="new-password">
+                    <input type="email" id="register-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required autocomplete="email">
+                    <input type="password" id="register-password" placeholder="Contraseña (mín. 6 caracteres)" class="w-full px-4 py-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required autocomplete="new-password">
                     <button type="submit" class="w-full h-10 px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center justify-center">Registrar</button>
                 </div>
                 <p class="mt-4 text-sm text-center">¿Ya tienes una cuenta? <a href="#" id="show-login" class="font-medium text-blue-600 hover:underline">Inicia sesión</a></p>
@@ -49,56 +54,63 @@
         </div>
     </div>
     
-    <!-- App Container -->
+    <!-- Contenedor Principal de la Aplicación -->
     <div id="app-container">
-        <!-- ... App content from previous step ... -->
+        <!-- El contenido de la app se cargará aquí desde la plantilla -->
     </div>
 
-    <!-- Modals -->
+    <!-- Contenedores para Modales -->
     <div id="modalBackdrop" class="modal-backdrop"></div>
     <div id="modalContainer"></div>
 
-    <!-- Templates -->
+    <!-- Plantillas HTML para reutilizar -->
+
+    <!-- Plantilla de la App Principal -->
     <template id="app-template">
          <div class="container mx-auto p-4 md:p-6 lg:p-8">
-            <header class="mb-6"><div class="flex justify-between items-center"><h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center"><i class="fas fa-fish-fins mr-3 text-blue-500"></i> Inventario de Pesca</h1><div class="text-right"><p id="user-email" class="text-sm text-gray-500"></p><button id="logout-btn" class="text-sm text-red-500 hover:underline">Cerrar Sesión</button></div></div></header>
-            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4"><div class="relative w-full md:w-1/2 lg:w-1/3"><input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto..."><i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i></div><button id="addProductBtn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center shadow-md"><i class="fas fa-plus mr-2"></i> Agregar Producto</button></div>
+            <header class="mb-6"><div class="flex justify-between items-center"><h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center"><i class="fas fa-fish-fins mr-3 text-blue-500"></i> Inventario de Pesca</h1><div class="text-right"><p id="user-email" class="text-sm text-gray-500 dark:text-gray-400"></p><button id="logout-btn" class="text-sm text-red-500 hover:underline">Cerrar Sesión</button></div></div></header>
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4"><div class="relative w-full md:w-1/2 lg:w-1/3"><input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 border rounded-lg dark:bg-gray-800 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto..."><i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i></div><button id="addProductBtn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center shadow-md"><i class="fas fa-plus mr-2"></i> Agregar Producto</button></div>
             <div id="loader" class="text-center py-10"><i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i><p class="mt-2">Cargando...</p></div>
             <div id="noProductsMessage" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md p-8"><i class="fas fa-box-open fa-3x text-gray-400"></i><p class="mt-4 text-xl">No hay productos en tu inventario.</p><p class="text-gray-500 dark:text-gray-400">¡Agrega tu primer producto para comenzar!</p></div>
             <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
     </template>
     
+    <!-- Plantilla para el Modal de Producto (Agregar/Editar) -->
     <template id="product-modal-template">
         <div class="modal w-11/12 md:max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-            <form class="p-6"><input type="hidden" id="productId"><h2 id="modalTitle" class="text-2xl font-bold mb-6"></h2><div class="grid grid-cols-1 gap-4"><input type="text" id="productName" placeholder="Nombre del Producto" class="w-full p-2 border rounded-lg" required><select id="productCategory" class="w-full p-2 border rounded-lg" required><option value="" disabled>Seleccione Categoría</option><option value="Cañas">Cañas</option><option value="Reels">Reels</option><option value="Señuelos">Señuelos</option><option value="Líneas y Anzuelos">Líneas y Anzuelos</option><option value="Accesorios">Accesorios</option><option value="Indumentaria">Indumentaria</option><option value="Camping">Camping</option><option value="Otros">Otros</option></select><input type="text" id="productSku" placeholder="SKU / Código" class="w-full p-2 border rounded-lg"><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3">$</span><input type="number" id="productPrice" placeholder="Precio" min="0" step="0.01" class="w-full pl-7 p-2 border rounded-lg"></div><input type="text" id="productSupplier" placeholder="Proveedor" class="w-full p-2 border rounded-lg"><textarea id="productDescription" placeholder="Descripción" rows="3" class="w-full p-2 border rounded-lg"></textarea><div id="initialStockContainer"><label for="productQuantity" class="block mb-1 font-medium text-sm">Stock Inicial</label><input type="number" id="productQuantity" min="0" value="0" class="w-full p-2 border rounded-lg" required></div></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center font-semibold">Guardar</button></div></form>
+            <form class="p-6"><input type="hidden" id="productId"><h2 id="modalTitle" class="text-2xl font-bold mb-6"></h2><div class="grid grid-cols-1 gap-4"><input type="text" id="productName" placeholder="Nombre del Producto" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required><select id="productCategory" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required><option value="" disabled>Seleccione Categoría</option><option value="Cañas">Cañas</option><option value="Reels">Reels</option><option value="Señuelos">Señuelos</option><option value="Líneas y Anzuelos">Líneas y Anzuelos</option><option value="Accesorios">Accesorios</option><option value="Indumentaria">Indumentaria</option><option value="Camping">Camping</option><option value="Otros">Otros</option></select><input type="text" id="productSku" placeholder="SKU / Código" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3">$</span><input type="number" id="productPrice" placeholder="Precio" min="0" step="0.01" class="w-full pl-7 p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"></div><input type="text" id="productSupplier" placeholder="Proveedor" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"><textarea id="productDescription" placeholder="Descripción" rows="3" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600"></textarea><div id="initialStockContainer"><label for="productQuantity" class="block mb-1 font-medium text-sm">Stock Inicial</label><input type="number" id="productQuantity" min="0" value="0" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required></div></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center font-semibold">Guardar</button></div></form>
         </div>
     </template>
 
+    <!-- Plantilla para el Modal de Ajuste de Stock -->
     <template id="stock-modal-template">
         <div class="modal w-11/12 md:max-w-sm bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-            <form class="p-6"><h2 class="text-2xl font-bold mb-4">Ajustar Stock</h2><p class="mb-4" id="stockProductName"></p><div class="grid grid-cols-1 gap-4"><select id="movementType" class="w-full p-2 border rounded-lg" required><option value="entrada">Entrada (Compra)</option><option value="salida">Salida (Venta/Ajuste)</option></select><input type="number" id="movementQuantity" placeholder="Cantidad" class="w-full p-2 border rounded-lg" min="1" required><input type="text" id="movementReason" placeholder="Motivo (ej: Venta, Pedido #123)" class="w-full p-2 border rounded-lg" required></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center font-semibold">Confirmar</button></div></form>
+            <form class="p-6"><h2 class="text-2xl font-bold mb-4">Ajustar Stock</h2><p class="mb-4" id="stockProductName"></p><div class="grid grid-cols-1 gap-4"><select id="movementType" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required><option value="entrada">Entrada (Compra)</option><option value="salida">Salida (Venta/Ajuste)</option></select><input type="number" id="movementQuantity" placeholder="Cantidad" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" min="1" required><input type="text" id="movementReason" placeholder="Motivo (ej: Venta, Pedido #123)" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center font-semibold">Confirmar</button></div></form>
         </div>
     </template>
 
+    <!-- Plantilla para el Modal de Historial -->
     <template id="history-modal-template">
         <div class="modal w-11/12 md:max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-            <div class="p-6"><h2 class="text-2xl font-bold mb-2">Historial de Movimientos</h2><p class="mb-4 text-gray-500" id="historyProductName"></p><div id="historyContent" class="max-h-96 overflow-y-auto pr-2"></div><div class="flex justify-end mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button></div></div>
+            <div class="p-6"><h2 class="text-2xl font-bold mb-2">Historial de Movimientos</h2><p class="mb-4 text-gray-500 dark:text-gray-400" id="historyProductName"></p><div id="historyContent" class="max-h-96 overflow-y-auto pr-2"></div><div class="flex justify-end mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Cerrar</button></div></div>
         </div>
     </template>
 
+    <!-- Plantilla para el Diálogo de Confirmación -->
     <template id="confirm-dialog-template">
         <div class="modal w-11/12 max-w-sm p-6 text-center bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
-            <i class="fas fa-trash-alt fa-2x text-red-500 mb-4"></i><h3 class="text-lg font-bold mb-2">¿Estás seguro?</h3><p class="mb-6">Esta acción no se puede deshacer.</p><div class="flex justify-center gap-4"><button class="cancel-btn px-6 py-2 bg-gray-200 rounded-lg">Cancelar</button><button class="confirm-delete-btn px-6 py-2 bg-red-600 text-white rounded-lg">Eliminar</button></div>
+            <i class="fas fa-trash-alt fa-2x text-red-500 mb-4"></i><h3 class="text-lg font-bold mb-2">¿Estás seguro?</h3><p class="mb-6">Esta acción no se puede deshacer.</p><div class="flex justify-center gap-4"><button class="cancel-btn px-6 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Cancelar</button><button class="confirm-delete-btn px-6 py-2 bg-red-600 text-white rounded-lg">Eliminar</button></div>
         </div>
     </template>
     
     <script type="module">
+        // Importaciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
-        // --- PASTE YOUR FIREBASE CONFIG HERE ---
+        // --- PEGUE AQUÍ SU CONFIGURACIÓN DE FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDqc9O8o1Z5BQXzgVQO6IWzYeGqnapQCTY",
             authDomain: "inventario-pesca-app.firebaseapp.com",
@@ -108,52 +120,45 @@
             appId: "1:252107773486:web:561229ba98867ee95571bf",
             measurementId: "G-VG7VELT7B7"
         };
-        // ------------------------------------
+        // ---------------------------------------------
 
+        // Inicialización de Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
         
-        // --- Global State ---
-        let productsUnsubscribe = null;
-        let currentOpenModal = null;
+        // --- Estado Global ---
+        let productsUnsubscribe = null; // Para cancelar la escucha de productos al cerrar sesión
+        let currentOpenModal = null; // Referencia al modal actualmente abierto
 
-        // --- DOM Elements ---
+        // --- Elementos del DOM ---
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
         const modalBackdrop = document.getElementById('modalBackdrop');
         const modalContainer = document.getElementById('modalContainer');
 
-        // --- Utility Functions ---
+        // --- Funciones de Utilidad ---
         
-        /**
-         * Toggles a loading state on a button.
-         * @param {HTMLButtonElement} button The button element.
-         * @param {boolean} isLoading True to show loading, false to hide.
-         */
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
                 button.disabled = true;
                 button.dataset.originalText = button.innerHTML;
                 button.innerHTML = `<div class="w-5 h-5 border-2 border-white rounded-full animate-spin loading-spinner"></div>`;
             } else {
-                button.disabled = false;
-                button.innerHTML = button.dataset.originalText;
+                if(button.dataset.originalText) {
+                    button.disabled = false;
+                    button.innerHTML = button.dataset.originalText;
+                }
             }
         }
         
-        /**
-         * Displays a notification message.
-         * @param {string} message The message to display.
-         * @param {('success'|'error')} type The type of notification.
-         */
         function showNotification(message, type = 'error') {
             const notification = document.getElementById('notification');
             const messageP = document.getElementById('notification-message');
             
             messageP.textContent = message;
-            notification.classList.toggle('bg-red-600', type === 'error');
-            notification.classList.toggle('bg-green-600', type === 'success');
+            notification.className = 'notification fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 text-white text-center rounded-b-lg shadow-lg opacity-0 -translate-y-full z-50';
+            notification.classList.add(type === 'success' ? 'bg-green-600' : 'bg-red-600');
             
             notification.classList.remove('opacity-0', '-translate-y-full');
             
@@ -162,34 +167,34 @@
             }, 3000);
         }
 
-        // --- Authentication ---
+        // --- Lógica de Autenticación ---
 
-        /**
-         * Main controller for application state based on user authentication.
-         */
         onAuthStateChanged(auth, user => {
             if (user) {
+                // Si el usuario está autenticado, muestra la app
                 authContainer.style.display = 'none';
-                appContainer.innerHTML = document.getElementById('app-template').content.cloneNode(true);
+                const appTemplate = document.getElementById('app-template').content.cloneNode(true);
+                appContainer.innerHTML = ''; // Limpia el contenedor antes de añadir
+                appContainer.appendChild(appTemplate);
                 appContainer.style.display = 'block';
-                document.getElementById('user-email').textContent = user.email;
+
+                // CORRECCIÓN: Busca el elemento DENTRO del contenedor de la app
+                appContainer.querySelector('#user-email').textContent = user.email;
                 initializeAppLogic(user.uid);
             } else {
+                // Si no hay usuario, muestra el formulario de login/registro
                 authContainer.style.display = 'flex';
                 appContainer.style.display = 'none';
-                appContainer.innerHTML = ''; // Clean up app content
-                if (productsUnsubscribe) productsUnsubscribe();
+                appContainer.innerHTML = '';
+                if (productsUnsubscribe) productsUnsubscribe(); // Detiene la escucha de datos
             }
         });
         
-        // Setup auth form listeners once
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-
-        document.getElementById('show-register').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'none'; registerForm.style.display = 'block'; });
-        document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'block'; registerForm.style.display = 'none'; });
+        // Listeners para formularios de login/registro
+        document.getElementById('show-register').addEventListener('click', e => { e.preventDefault(); document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; });
+        document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); document.getElementById('login-form').style.display = 'block'; document.getElementById('register-form').style.display = 'none'; });
         
-        loginForm.addEventListener('submit', async e => {
+        document.getElementById('login-form').addEventListener('submit', async e => {
             e.preventDefault();
             const button = e.target.querySelector('button[type="submit"]');
             setButtonLoading(button, true);
@@ -204,7 +209,7 @@
             }
         });
 
-        registerForm.addEventListener('submit', async e => {
+        document.getElementById('register-form').addEventListener('submit', async e => {
             e.preventDefault();
             const button = e.target.querySelector('button[type="submit"]');
             setButtonLoading(button, true);
@@ -221,31 +226,38 @@
         
         function getAuthErrorMessage(code) {
             switch (code) {
-                case 'auth/user-not-found': return 'No se encontró un usuario con ese correo.';
-                case 'auth/wrong-password': return 'Contraseña incorrecta.';
+                case 'auth/user-not-found': case 'auth/wrong-password': return 'Correo o contraseña incorrectos.';
                 case 'auth/email-already-in-use': return 'Ese correo electrónico ya está en uso.';
                 case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.';
                 case 'auth/invalid-email': return 'El correo electrónico no es válido.';
-                default: return 'Ocurrió un error de autenticación.';
+                default: return 'Ocurrió un error. Inténtalo de nuevo.';
             }
         }
 
-        // --- App Logic ---
+        // --- Lógica Principal de la App ---
         
-        /**
-         * Initializes the main application logic and event listeners for a logged-in user.
-         * @param {string} userId The UID of the authenticated user.
-         */
         function initializeAppLogic(userId) {
             const collectionPath = `users/${userId}/products`;
             const productsCollectionRef = collection(db, collectionPath);
-            setupAppEventListeners(productsCollectionRef);
-            listenForProducts(productsCollectionRef);
+            setupAppEventListeners(productsCollectionRef, userId);
+            listenForProducts(productsCollectionRef, userId);
         }
 
-        // --- UI and Modal Functions ---
-        function openModal(modalElement) { closeModal(); currentOpenModal = modalElement; modalContainer.appendChild(currentOpenModal); modalBackdrop.style.display = 'block'; }
-        function closeModal() { if (currentOpenModal) { currentOpenModal.remove(); } modalBackdrop.style.display = 'none'; currentOpenModal = null; }
+        // --- Modales ---
+        function openModal(modalElement) { 
+            closeModal(); 
+            currentOpenModal = modalElement;
+            modalContainer.appendChild(currentOpenModal);
+            currentOpenModal.style.display = 'block';
+            modalBackdrop.style.display = 'block'; 
+        }
+        function closeModal() { 
+            if (currentOpenModal) { 
+                currentOpenModal.remove(); 
+                currentOpenModal = null; 
+            } 
+            modalBackdrop.style.display = 'none';
+        }
 
         function showConfirmDialog() {
             return new Promise(resolve => {
@@ -257,40 +269,86 @@
             });
         }
         
-        /**
-         * Creates an HTML element for a product card.
-         * @param {object} product The product data.
-         * @param {import("firebase/firestore").CollectionReference} collectionRef Firestore collection reference.
-         * @returns {HTMLElement} The product card element.
-         */
-        function createProductCard(product, collectionRef) {
-            // ... (The same card creation logic as before)
+        // --- Renderizado y Eventos ---
+
+        function createProductCard(product, collectionRef, userId) {
+            const card = document.createElement('div');
+            card.className = 'product-card group bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 flex flex-col justify-between relative';
+            const price = typeof product.price === 'number' ? `$${product.price.toFixed(2)}` : 'N/A';
+            const searchableContent = [product.name, product.category, product.sku, product.supplier, product.description].join(' ').toLowerCase();
+            card.dataset.search = searchableContent;
+
+            card.innerHTML = `
+                <div>
+                    <div class="flex justify-between items-start">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-500 dark:text-blue-400">${product.category || 'Sin Categoría'}</span>
+                        <div class="relative">
+                            <button class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 py-1">
+                                <a href="#" class="edit-btn block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Editar</a>
+                                <a href="#" class="stock-btn block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Ajustar Stock</a>
+                                <a href="#" class="history-btn block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">Ver Historial</a>
+                                <a href="#" class="delete-btn block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-600">Eliminar</a>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mt-2 text-gray-900 dark:text-white">${product.name}</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">${product.sku || 'Sin SKU'}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">${product.description || 'Sin descripción.'}</p>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-gray-500">Stock Actual</p>
+                        <p class="text-2xl font-bold">${product.quantity}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500">Precio</p>
+                        <p class="text-lg font-bold">${price}</p>
+                    </div>
+                </div>
+            `;
+
+            // Añadir listeners para los botones de acción
+            card.querySelector('.edit-btn').onclick = (e) => { e.preventDefault(); handleEdit(product, collectionRef); };
+            card.querySelector('.stock-btn').onclick = (e) => { e.preventDefault(); handleStockAdjust(product, collectionRef); };
+            card.querySelector('.history-btn').onclick = (e) => { e.preventDefault(); handleShowHistory(product, userId); };
+            card.querySelector('.delete-btn').onclick = async (e) => { e.preventDefault(); await handleDelete(product.id, collectionRef); };
+            
+            // Lógica para mostrar/ocultar el menú de acciones
+            const menuButton = card.querySelector('button');
+            const actionMenu = card.querySelector('.action-menu');
+            menuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.action-menu').forEach(m => {
+                    if (m !== actionMenu) m.style.display = 'none';
+                });
+                actionMenu.style.display = actionMenu.style.display === 'block' ? 'none' : 'block';
+            });
+
+            return card;
         }
 
-        /**
-         * Sets up the main event listeners for the application UI.
-         * @param {import("firebase/firestore").CollectionReference} collectionRef Firestore collection reference.
-         */
-        function setupAppEventListeners(collectionRef) {
+        function setupAppEventListeners(collectionRef, userId) {
             appContainer.querySelector('#logout-btn').onclick = () => signOut(auth);
             appContainer.querySelector('#addProductBtn').onclick = () => handleEdit(null, collectionRef);
             appContainer.querySelector('#searchInput').oninput = e => {
-                const searchTerm = e.target.value.toLowerCase();
+                const searchTerm = e.target.value.toLowerCase().trim();
                 appContainer.querySelectorAll('.product-card').forEach(card => {
                     card.style.display = card.dataset.search.includes(searchTerm) ? 'flex' : 'none';
                 });
             };
             modalBackdrop.onclick = closeModal;
-            document.addEventListener('click', () => appContainer.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none'), true);
+            document.addEventListener('click', () => {
+                const openMenu = document.querySelector('.action-menu[style*="block"]');
+                if (openMenu) openMenu.style.display = 'none';
+            });
         }
 
-        // --- Firestore Operations ---
+        // --- Lógica CRUD y Operaciones con Firestore ---
         
-        /**
-         * Listens for real-time updates on the products collection.
-         * @param {import("firebase/firestore").CollectionReference} collectionRef Firestore collection reference.
-         */
-        function listenForProducts(collectionRef) {
+        function listenForProducts(collectionRef, userId) {
             if (productsUnsubscribe) productsUnsubscribe();
             
             const q = query(collectionRef, orderBy("name"));
@@ -306,16 +364,215 @@
                 
                 snapshot.forEach(doc => {
                     const product = { id: doc.id, ...doc.data() };
-                    productsGrid.appendChild(createProductCard(product, collectionRef));
+                    productsGrid.appendChild(createProductCard(product, collectionRef, userId));
                 });
             }, error => {
-                console.error("Error listening to products:", error);
+                console.error("Error al escuchar productos:", error);
                 showNotification('Error al cargar los productos.');
             });
         }
-        // ... (The rest of the CRUD and Handler functions: handleEdit, handleDelete, etc.)
-        // Note: The full logic for these functions needs to be ported here from the previous complete version.
-        // This is a structural example.
+        
+        function handleEdit(product, collectionRef) {
+            const template = document.getElementById('product-modal-template');
+            const modalContent = template.content.cloneNode(true);
+            const modal = modalContent.firstElementChild;
+            const form = modal.querySelector('form');
+            const modalTitle = modal.querySelector('#modalTitle');
+            const initialStockContainer = modal.querySelector('#initialStockContainer');
+
+            if (product) { // Modo Edición
+                modalTitle.textContent = 'Editar Producto';
+                modal.querySelector('#productId').value = product.id;
+                modal.querySelector('#productName').value = product.name || '';
+                modal.querySelector('#productCategory').value = product.category || '';
+                modal.querySelector('#productSku').value = product.sku || '';
+                modal.querySelector('#productPrice').value = product.price || '';
+                modal.querySelector('#productSupplier').value = product.supplier || '';
+                modal.querySelector('#productDescription').value = product.description || '';
+                initialStockContainer.style.display = 'none'; // No se puede editar stock inicial
+            } else { // Modo Agregar
+                modalTitle.textContent = 'Agregar Producto';
+                initialStockContainer.style.display = 'block';
+            }
+            
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(button, true);
+
+                const data = {
+                    name: modal.querySelector('#productName').value,
+                    category: modal.querySelector('#productCategory').value,
+                    sku: modal.querySelector('#productSku').value,
+                    price: parseFloat(modal.querySelector('#productPrice').value) || 0,
+                    supplier: modal.querySelector('#productSupplier').value,
+                    description: modal.querySelector('#productDescription').value,
+                    updatedAt: Timestamp.now()
+                };
+
+                try {
+                    if (product) { // Actualizar
+                        const productRef = doc(collectionRef, product.id);
+                        await updateDoc(productRef, data);
+                        showNotification('Producto actualizado con éxito', 'success');
+                    } else { // Crear
+                        data.quantity = parseInt(modal.querySelector('#productQuantity').value) || 0;
+                        data.createdAt = Timestamp.now();
+                        await addDoc(collectionRef, data);
+                        showNotification('Producto agregado con éxito', 'success');
+                    }
+                    closeModal();
+                } catch (error) {
+                    console.error("Error guardando producto:", error);
+                    showNotification('Error al guardar el producto.');
+                } finally {
+                    setButtonLoading(button, false);
+                }
+            };
+
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            openModal(modal);
+        }
+
+        async function handleDelete(productId, collectionRef) {
+            const confirmed = await showConfirmDialog();
+            if (confirmed) {
+                try {
+                    await deleteDoc(doc(collectionRef, productId));
+                    showNotification('Producto eliminado.', 'success');
+                } catch (error) {
+                    console.error("Error eliminando producto:", error);
+                    showNotification('Error al eliminar el producto.');
+                }
+            }
+        }
+        
+        function handleStockAdjust(product, collectionRef) {
+            const template = document.getElementById('stock-modal-template');
+            const modal = template.content.cloneNode(true).firstElementChild;
+            const form = modal.querySelector('form');
+            modal.querySelector('#stockProductName').textContent = product.name;
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(button, true);
+
+                const type = modal.querySelector('#movementType').value;
+                const quantity = parseInt(modal.querySelector('#movementQuantity').value);
+                const reason = modal.querySelector('#movementReason').value;
+
+                if (isNaN(quantity) || quantity <= 0) {
+                    showNotification('La cantidad debe ser un número positivo.');
+                    setButtonLoading(button, false);
+                    return;
+                }
+
+                try {
+                    const productRef = doc(collectionRef, product.id);
+                    await runTransaction(db, async (transaction) => {
+                        const productDoc = await transaction.get(productRef);
+                        if (!productDoc.exists()) {
+                            throw "El documento no existe!";
+                        }
+
+                        const currentQuantity = productDoc.data().quantity || 0;
+                        let newQuantity = currentQuantity;
+                        
+                        if (type === 'entrada') {
+                            newQuantity += quantity;
+                        } else { // salida
+                            if (currentQuantity < quantity) {
+                                throw "No hay stock suficiente para esta salida.";
+                            }
+                            newQuantity -= quantity;
+                        }
+
+                        transaction.update(productRef, { quantity: newQuantity });
+
+                        // Registrar en historial
+                        const historyCollectionRef = collection(db, `${productRef.path}/history`);
+                        transaction.set(doc(historyCollectionRef), {
+                            type,
+                            quantity,
+                            reason,
+                            previousStock: currentQuantity,
+                            newStock: newQuantity,
+                            date: Timestamp.now(),
+                        });
+                    });
+
+                    showNotification('Stock actualizado con éxito.', 'success');
+                    closeModal();
+
+                } catch (error) {
+                    console.error("Error en transacción de stock:", error);
+                    showNotification(typeof error === 'string' ? error : 'Error al ajustar el stock.');
+                } finally {
+                    setButtonLoading(button, false);
+                }
+            };
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            openModal(modal);
+        }
+
+        async function handleShowHistory(product, userId) {
+            const template = document.getElementById('history-modal-template');
+            const modal = template.content.cloneNode(true).firstElementChild;
+            modal.querySelector('#historyProductName').textContent = product.name;
+            const contentDiv = modal.querySelector('#historyContent');
+            contentDiv.innerHTML = '<i class="fas fa-spinner fa-spin fa-lg"></i>';
+
+            modal.querySelector('.cancel-btn').onclick = closeModal;
+            openModal(modal);
+
+            try {
+                const historyCollectionRef = collection(db, `users/${userId}/products/${product.id}/history`);
+                const q = query(historyCollectionRef, orderBy("date", "desc"));
+                const querySnapshot = await getDocs(q);
+
+                if (querySnapshot.empty) {
+                    contentDiv.innerHTML = '<p>No hay movimientos registrados.</p>';
+                    return;
+                }
+                
+                contentDiv.innerHTML = '';
+                const table = document.createElement('table');
+                table.className = 'w-full text-sm text-left';
+                table.innerHTML = `
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <tr>
+                            <th scope="col" class="px-4 py-2">Fecha</th>
+                            <th scope="col" class="px-4 py-2">Tipo</th>
+                            <th scope="col" class="px-4 py-2">Cant.</th>
+                            <th scope="col" class="px-4 py-2">Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>`;
+                
+                const tbody = table.querySelector('tbody');
+                querySnapshot.forEach(doc => {
+                    const item = doc.data();
+                    const date = item.date.toDate().toLocaleString('es-ES');
+                    const typeClass = item.type === 'entrada' ? 'text-green-500' : 'text-red-500';
+                    const typeText = item.type === 'entrada' ? 'Entrada' : 'Salida';
+                    const row = document.createElement('tr');
+                    row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${date}</td>
+                        <td class="px-4 py-2 font-medium ${typeClass}">${typeText}</td>
+                        <td class="px-4 py-2 font-bold">${item.quantity}</td>
+                        <td class="px-4 py-2">${item.reason}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                contentDiv.appendChild(table);
+
+            } catch (error) {
+                console.error("Error al cargar historial:", error);
+                contentDiv.innerHTML = '<p class="text-red-500">No se pudo cargar el historial.</p>';
+            }
+        }
     </script>
 </body>
 </html>
