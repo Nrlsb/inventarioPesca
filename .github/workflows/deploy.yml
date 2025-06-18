@@ -8,6 +8,12 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    # --- AGREGA ESTA SECCIÓN DE PERMISOS AQUÍ ---
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    # -------------------------------------------
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
@@ -15,14 +21,14 @@ jobs:
       - name: Create Firebase config file 🤫
         run: |
           echo "export const firebaseConfig = ${{ secrets.FIREBASE_CONFIG }};" > firebase.js
-
+        
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # Sube todo el contenido del directorio actual
+          path: '.'
 
       - name: Deploy to GitHub Pages 🚀
         id: deployment
