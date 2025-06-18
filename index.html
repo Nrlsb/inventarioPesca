@@ -125,12 +125,6 @@
         const modalContainer = document.getElementById('modalContainer');
 
         // --- Utility Functions ---
-        
-        /**
-         * Toggles a loading state on a button.
-         * @param {HTMLButtonElement} button The button element.
-         * @param {boolean} isLoading True to show loading, false to hide.
-         */
         function setButtonLoading(button, isLoading) {
             if (isLoading) {
                 button.disabled = true;
@@ -142,21 +136,14 @@
             }
         }
         
-        /**
-         * Displays a notification message.
-         * @param {string} message The message to display.
-         * @param {'success'|'error'} type The type of notification.
-         */
         function showNotification(message, type = 'error') {
             const notification = document.getElementById('notification');
             const messageP = document.getElementById('notification-message');
-            
             messageP.textContent = message;
-            notification.classList.toggle('bg-red-600', type === 'error');
-            notification.classList.toggle('bg-green-600', type === 'success');
-            
-            notification.classList.remove('opacity-0', '-translate-y-full');
-            
+            notification.className = `notification fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 text-white text-center rounded-b-lg shadow-lg opacity-0 -translate-y-full z-50 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+            requestAnimationFrame(() => {
+                notification.classList.remove('opacity-0', '-translate-y-full');
+            });
             setTimeout(() => {
                 notification.classList.add('opacity-0', '-translate-y-full');
             }, 3000);
@@ -166,18 +153,16 @@
         onAuthStateChanged(auth, user => {
             if (user) {
                 authContainer.style.display = 'none';
-                // Only build the app UI if it's not already there
                 if (!appContainer.hasChildNodes()) {
                     const appTemplate = document.getElementById('app-template');
                     appContainer.appendChild(appTemplate.content.cloneNode(true));
-                    // Now that the template is in the DOM, we can safely initialize the app logic
                     initializeAppLogic(user);
                 }
                 appContainer.style.display = 'block';
             } else {
                 authContainer.style.display = 'flex';
                 appContainer.style.display = 'none';
-                appContainer.innerHTML = ''; // Clean up app content on logout
+                appContainer.innerHTML = '';
                 if (productsUnsubscribe) {
                     productsUnsubscribe();
                     productsUnsubscribe = null;
@@ -235,9 +220,7 @@
         function initializeAppLogic(user) {
             const collectionPath = `users/${user.uid}/products`;
             const productsCollectionRef = collection(db, collectionPath);
-            
             appContainer.querySelector('#user-email').textContent = user.email;
-
             setupAppEventListeners(productsCollectionRef);
             listenForProducts(productsCollectionRef);
         }
@@ -265,9 +248,8 @@
             
             const stockColor = product.quantity <= 5 ? 'text-red-500' : (product.quantity <= 20 ? 'text-yellow-500' : 'text-green-500');
             
-            card.innerHTML = `<div class="relative p-4 flex-grow"><div class="absolute top-2 right-2"><div class="relative"><button class="action-toggle-btn text-gray-500 hover:text-gray-700 p-2 rounded-full"><i class="fas fa-ellipsis-v"></i></button><div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 hidden"><a href="#" class="stock-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-exchange-alt fa-fw mr-2"></i>Ajustar Stock</a><a href="#" class="history-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-history fa-fw mr-2"></i>Ver Historial</a><a href="#" class="edit-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-edit fa-fw mr-2"></i>Editar Datos</a><a href="#" class="delete-btn block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-trash-alt fa-fw mr-2"></i>Eliminar</a></div></div></div><h3 class="text-lg font-bold text-gray-900 dark:text-white truncate pr-8" id="card-name-${product.id}"></h3><span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold my-2 px-2.5 py-0.5 rounded-full" id="card-category-${product.id}"></span><p class="text-sm text-gray-500 dark:text-gray-400 mb-3" id="card-sku-${product.id}"></p><div class="flex justify-between items-center text-lg"><span class="font-semibold text-blue-500" id="card-price-${product.id}"></span><span class="font-bold ${stockColor}" id="card-quantity-${product.id}"><i class="fas fa-boxes-stacked mr-1"></i>${product.quantity}</span></div></div>`;
+            card.innerHTML = `<div class="relative p-4 flex-grow"><div class="absolute top-2 right-2"><div class="relative"><button class="action-toggle-btn text-gray-500 hover:text-gray-700 p-2 rounded-full"><i class="fas fa-ellipsis-v"></i></button><div class="action-menu absolute hidden right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10"><a href="#" class="stock-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-exchange-alt fa-fw mr-2"></i>Ajustar Stock</a><a href="#" class="history-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-history fa-fw mr-2"></i>Ver Historial</a><a href="#" class="edit-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-edit fa-fw mr-2"></i>Editar Datos</a><a href="#" class="delete-btn block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-trash-alt fa-fw mr-2"></i>Eliminar</a></div></div></div><h3 class="text-lg font-bold text-gray-900 dark:text-white truncate pr-8" id="card-name-${product.id}"></h3><span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold my-2 px-2.5 py-0.5 rounded-full" id="card-category-${product.id}"></span><p class="text-sm text-gray-500 dark:text-gray-400 mb-3" id="card-sku-${product.id}"></p><div class="flex justify-between items-center text-lg"><span class="font-semibold text-blue-500" id="card-price-${product.id}"></span><span class="font-bold ${stockColor}" id="card-quantity-${product.id}"><i class="fas fa-boxes-stacked mr-1"></i>${product.quantity}</span></div></div>`;
             
-            // Use textContent for security
             card.querySelector(`#card-name-${product.id}`).textContent = product.name;
             card.querySelector(`#card-category-${product.id}`).textContent = product.category;
             card.querySelector(`#card-sku-${product.id}`).textContent = `SKU: ${product.sku || 'N/A'}`;
@@ -275,7 +257,16 @@
             
             const toggleBtn = card.querySelector('.action-toggle-btn');
             const menu = card.querySelector('.action-menu');
-            toggleBtn.addEventListener('click', e => { e.stopPropagation(); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
+            
+            toggleBtn.addEventListener('click', e => {
+                e.stopPropagation();
+                const isHidden = menu.classList.contains('hidden');
+                document.querySelectorAll('.action-menu').forEach(m => m.classList.add('hidden'));
+                if (isHidden) {
+                    menu.classList.remove('hidden');
+                }
+            });
+
             card.querySelector('.stock-btn').addEventListener('click', e => { e.preventDefault(); handleStockAdjustment(product, collectionRef); });
             card.querySelector('.history-btn').addEventListener('click', e => { e.preventDefault(); showHistory(product, collectionRef); });
             card.querySelector('.edit-btn').addEventListener('click', e => { e.preventDefault(); handleEdit(product, collectionRef); });
@@ -293,7 +284,9 @@
                 });
             };
             modalBackdrop.onclick = closeModal;
-            document.addEventListener('click', () => { if(appContainer.querySelector) appContainer.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none')}, true);
+            document.addEventListener('click', () => {
+                document.querySelectorAll('.action-menu').forEach(m => m.classList.add('hidden'));
+            });
         }
 
         // --- Firestore ---
