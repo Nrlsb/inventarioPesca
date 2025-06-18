@@ -93,7 +93,7 @@
         </div>
     </template>
 
-    <!-- Plantilla para el Modal de Ajuste de Stock  -->
+    <!-- Plantilla para el Modal de Ajuste de Stock -->
     <template id="stock-modal-template">
         <div class="modal w-11/12 md:max-w-sm bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
             <form class="p-6"><h2 class="text-2xl font-bold mb-4">Ajustar Stock</h2><p class="mb-4" id="stockProductName"></p><div class="grid grid-cols-1 gap-4"><select id="movementType" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required><option value="entrada">Entrada (Compra)</option><option value="salida">Salida (Venta/Ajuste)</option></select><input type="number" id="movementQuantity" placeholder="Cantidad" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" min="1" required><input type="text" id="movementReason" placeholder="Motivo (ej: Venta, Pedido #123)" class="w-full p-2 border rounded-lg dark:bg-gray-700 dark:border-gray-600" required></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-300 dark:bg-gray-600 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center font-semibold">Confirmar</button></div></form>
