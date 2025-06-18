@@ -115,22 +115,13 @@
     </template>
     
     <script type="module">
-        // Importaciones de Firebase (con 'limit' y 'startAfter' para paginación)
+        // Importaciones de Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp, orderBy, limit, startAfter } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // --- PEGUE AQUÍ SU CONFIGURACIÓN DE FIREBASE ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyDqc9O8o1Z5BQXzgVQO6IWzYeGqnapQCTY",
-            authDomain: "inventario-pesca-app.firebaseapp.com",
-            projectId: "inventario-pesca-app",
-            storageBucket: "inventario-pesca-app.firebasestorage.app",
-            messagingSenderId: "252107773486",
-            appId: "1:252107773486:web:561229ba98867ee95571bf",
-            measurementId: "G-VG7VELT7B7"
-        };
-        // ---------------------------------------------
+        
+        // ¡Importamos la configuración desde el archivo local 'firebase.js'!
+        import { firebaseConfig } from './firebase.js';
 
         // Inicialización de Firebase
         const app = initializeApp(firebaseConfig);
@@ -138,9 +129,9 @@
         const auth = getAuth(app);
         
         // --- Estado Global y Constantes ---
-        let productsUnsubscribe = null; // Para cancelar la escucha de productos al cerrar sesión
-        let currentOpenModal = null; // Referencia al modal actualmente abierto
-        const HISTORY_PAGE_SIZE = 15; // MEJORA 3: Constante para la paginación
+        let productsUnsubscribe = null; 
+        let currentOpenModal = null; 
+        const HISTORY_PAGE_SIZE = 15;
 
         // --- Elementos del DOM ---
         const authContainer = document.getElementById('auth-container');
@@ -240,9 +231,8 @@
             }
         }
         
-        // MEJORA 2: Función para mensajes de error de Firestore
         function getFirestoreErrorMessage(error) {
-            console.error("Firestore Error:", error); // Mantener el log para depuración
+            console.error("Firestore Error:", error); 
             switch (error.code) {
                 case 'permission-denied':
                     return 'No tienes permiso para realizar esta acción.';
@@ -334,17 +324,14 @@
             card.querySelector('.history-btn').onclick = (e) => { e.preventDefault(); handleShowHistory(product, userId); };
             card.querySelector('.delete-btn').onclick = async (e) => { e.preventDefault(); await handleDelete(product.id, collectionRef); };
             
-            // MEJORA 4: Lógica para mostrar solo un menú a la vez
             const menuButton = card.querySelector('.menu-button');
             const actionMenu = card.querySelector('.action-menu');
             menuButton.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const isVisible = actionMenu.style.display === 'block';
-                // Primero, cierra todos los demás menús abiertos
                 document.querySelectorAll('.action-menu').forEach(m => {
                     m.style.display = 'none';
                 });
-                // Luego, muestra u oculta el menú actual
                 if (!isVisible) {
                     actionMenu.style.display = 'block';
                 }
@@ -363,7 +350,6 @@
                 });
             };
             modalBackdrop.onclick = closeModal;
-            // Listener global para cerrar menús si se hace clic fuera
             document.addEventListener('click', () => { 
                 document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none');
             });
@@ -390,7 +376,6 @@
                     productsGrid.appendChild(createProductCard(product, collectionRef, userId));
                 });
             }, error => {
-                // MEJORA 2: Usando el manejador de errores específico
                 showNotification(getFirestoreErrorMessage(error));
             });
         }
@@ -403,7 +388,7 @@
             const modalTitle = modal.querySelector('#modalTitle');
             const initialStockContainer = modal.querySelector('#initialStockContainer');
 
-            if (product) { // Modo Edición
+            if (product) {
                 modalTitle.textContent = 'Editar Producto';
                 modal.querySelector('#productId').value = product.id;
                 modal.querySelector('#productName').value = product.name || '';
@@ -413,7 +398,7 @@
                 modal.querySelector('#productSupplier').value = product.supplier || '';
                 modal.querySelector('#productDescription').value = product.description || '';
                 initialStockContainer.style.display = 'none';
-            } else { // Modo Agregar
+            } else {
                 modalTitle.textContent = 'Agregar Producto';
                 initialStockContainer.style.display = 'block';
             }
@@ -446,7 +431,6 @@
                     }
                     closeModal();
                 } catch (error) {
-                    // MEJORA 2: Usando el manejador de errores específico
                     showNotification(getFirestoreErrorMessage(error));
                 } finally {
                     setButtonLoading(button, false);
@@ -464,7 +448,6 @@
                     await deleteDoc(doc(collectionRef, productId));
                     showNotification('Producto eliminado.', 'success');
                 } catch (error) {
-                    // MEJORA 2: Usando el manejador de errores específico
                     showNotification(getFirestoreErrorMessage(error));
                 }
             }
@@ -529,14 +512,12 @@
             openModal(modal);
         }
 
-        // MEJORA 3: Lógica de paginación para el historial
         async function handleShowHistory(product, userId) {
             const template = document.getElementById('history-modal-template');
             const modal = template.content.cloneNode(true).firstElementChild;
             modal.querySelector('#historyProductName').textContent = product.name;
             const contentDiv = modal.querySelector('#historyContent');
             
-            // Crear la estructura de la tabla y el contenedor para el botón
             contentDiv.innerHTML = `
                 <table class="w-full text-sm text-left">
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -558,12 +539,11 @@
             openModal(modal);
 
             const historyCollectionRef = collection(db, `users/${userId}/products/${product.id}/history`);
-            let lastVisibleDoc = null; // Guardará el último documento para la paginación
+            let lastVisibleDoc = null; 
 
             const loadMoreHistory = async () => {
                 loadMoreContainer.innerHTML = '<i class="fas fa-spinner fa-spin fa-lg text-blue-500"></i>';
 
-                // Construir la consulta
                 let q = query(historyCollectionRef, orderBy("date", "desc"), limit(HISTORY_PAGE_SIZE));
                 if (lastVisibleDoc) {
                     q = query(q, startAfter(lastVisibleDoc));
@@ -593,7 +573,7 @@
                     });
 
                     lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
-                    loadMoreContainer.innerHTML = ''; // Limpiar el spinner/botón anterior
+                    loadMoreContainer.innerHTML = ''; 
 
                     if (querySnapshot.docs.length === HISTORY_PAGE_SIZE) {
                         const loadMoreBtn = document.createElement('button');
@@ -607,7 +587,6 @@
                 }
             };
             
-            // Cargar la primera página de resultados
             await loadMoreHistory();
         }
     </script>
