@@ -20,9 +20,7 @@ jobs:
 
       - name: Create Firebase config file 🤫
         run: |
-          cat <<EOF > firebase.js
-          export const firebaseConfig = ${{ secrets.FIREBASE_CONFIG }};S
-          EOF
+          echo 'export const firebaseConfig = ${{ secrets.FIREBASE_CONFIG }};' > firebase.js
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
