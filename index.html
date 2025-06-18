@@ -3,106 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario de Pesca</title>
+    <title>Inventario de Pesca - App Segura</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .modal-backdrop {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); z-index: 40;
-        }
-        .modal {
-            display: none; position: fixed; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); z-index: 50;
-        }
+        .modal-backdrop { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 40; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 50; }
         .action-menu { display: none; }
         .group:hover .action-menu { display: block; }
         #auth-container, #app-container { display: none; }
+        .loading-spinner { border-top-color: transparent; }
+        .notification { transition: opacity 0.5s, transform 0.5s; }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
 
+    <!-- Notification Bar -->
+    <div id="notification" class="notification fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-md p-4 bg-red-600 text-white text-center rounded-b-lg shadow-lg opacity-0 -translate-y-full z-50">
+        <p id="notification-message"></p>
+    </div>
+
     <!-- Auth Container -->
-    <div id="auth-container" class="min-h-screen flex items-center justify-center">
+    <div id="auth-container" class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-            <!-- Login Form -->
             <form id="login-form">
                 <h2 class="text-2xl font-bold text-center">Iniciar Sesión</h2>
                 <div class="mt-4 space-y-4">
-                    <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required>
-                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full px-4 py-2 border rounded-lg" required>
-                    <button type="submit" class="w-full px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Ingresar</button>
+                    <input type="email" id="login-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required autocomplete="email">
+                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full px-4 py-2 border rounded-lg" required autocomplete="current-password">
+                    <button type="submit" class="w-full h-10 px-4 py-2 font-bold text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center">Ingresar</button>
                 </div>
                 <p class="mt-4 text-sm text-center">¿No tienes una cuenta? <a href="#" id="show-register" class="font-medium text-blue-600 hover:underline">Regístrate</a></p>
             </form>
-            <!-- Register Form -->
             <form id="register-form" class="hidden">
                  <h2 class="text-2xl font-bold text-center">Crear Cuenta</h2>
                  <div class="mt-4 space-y-4">
-                    <input type="email" id="register-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required>
-                    <input type="password" id="register-password" placeholder="Contraseña (mín. 6 caracteres)" class="w-full px-4 py-2 border rounded-lg" required>
-                    <button type="submit" class="w-full px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700">Registrar</button>
+                    <input type="email" id="register-email" placeholder="Correo electrónico" class="w-full px-4 py-2 border rounded-lg" required autocomplete="email">
+                    <input type="password" id="register-password" placeholder="Contraseña (mín. 6 caracteres)" class="w-full px-4 py-2 border rounded-lg" required autocomplete="new-password">
+                    <button type="submit" class="w-full h-10 px-4 py-2 font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center justify-center">Registrar</button>
                 </div>
                 <p class="mt-4 text-sm text-center">¿Ya tienes una cuenta? <a href="#" id="show-login" class="font-medium text-blue-600 hover:underline">Inicia sesión</a></p>
             </form>
-            <div id="auth-error" class="mt-4 text-center text-red-500 font-medium"></div>
         </div>
     </div>
     
     <!-- App Container -->
     <div id="app-container">
-        <div class="container mx-auto p-4 md:p-6 lg:p-8">
-            <header class="mb-6">
-                 <div class="flex justify-between items-center">
-                    <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center">
-                        <i class="fas fa-fish-fins mr-3 text-blue-500"></i> Inventario de Pesca
-                    </h1>
-                    <div class="text-right">
-                         <p id="user-email" class="text-sm text-gray-500"></p>
-                        <button id="logout-btn" class="text-sm text-red-500 hover:underline">Cerrar Sesión</button>
-                    </div>
-                </div>
-            </header>
+        <!-- App content will be injected from template -->
+    </div>
 
-            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-                <div class="relative w-full md:w-1/2 lg:w-1/3">
-                    <input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto...">
-                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                </div>
-                <button id="addProductBtn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center shadow-md">
-                    <i class="fas fa-plus mr-2"></i> Agregar Producto
-                </button>
-            </div>
+    <!-- Modals will be injected into this container -->
+    <div id="modalBackdrop" class="modal-backdrop"></div>
+    <div id="modalContainer"></div>
 
+    <!-- TEMPLATES -->
+    <template id="app-template">
+         <div class="container mx-auto p-4 md:p-6 lg:p-8">
+            <header class="mb-6"><div class="flex justify-between items-center"><h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white flex items-center"><i class="fas fa-fish-fins mr-3 text-blue-500"></i> Inventario de Pesca</h1><div class="text-right"><p id="user-email" class="text-sm text-gray-500"></p><button id="logout-btn" class="text-sm text-red-500 hover:underline">Cerrar Sesión</button></div></div></header>
+            <div class="flex flex-col md:flex-row items-center justify-between mb-6 gap-4"><div class="relative w-full md:w-1/2 lg:w-1/3"><input type="text" id="searchInput" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Buscar producto..."><i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i></div><button id="addProductBtn" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center shadow-md"><i class="fas fa-plus mr-2"></i> Agregar Producto</button></div>
             <div id="loader" class="text-center py-10"><i class="fas fa-spinner fa-spin fa-3x text-blue-500"></i><p class="mt-2">Cargando...</p></div>
             <div id="noProductsMessage" class="hidden text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow-md p-8"><i class="fas fa-box-open fa-3x text-gray-400"></i><p class="mt-4 text-xl">No hay productos en tu inventario.</p><p class="text-gray-500 dark:text-gray-400">¡Agrega tu primer producto para comenzar!</p></div>
             <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
         </div>
-    </div>
+    </template>
+    
+    <template id="product-modal-template">
+        <div class="modal w-11/12 md:max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+            <form class="p-6"><input type="hidden" id="productId"><h2 id="modalTitle" class="text-2xl font-bold mb-6"></h2><div class="grid grid-cols-1 gap-4"><input type="text" id="productName" placeholder="Nombre del Producto" class="w-full p-2 border rounded-lg" required><select id="productCategory" class="w-full p-2 border rounded-lg" required><option value="" disabled>Seleccione Categoría</option><option value="Cañas">Cañas</option><option value="Reels">Reels</option><option value="Señuelos">Señuelos</option><option value="Líneas y Anzuelos">Líneas y Anzuelos</option><option value="Accesorios">Accesorios</option><option value="Indumentaria">Indumentaria</option><option value="Camping">Camping</option><option value="Otros">Otros</option></select><input type="text" id="productSku" placeholder="SKU / Código" class="w-full p-2 border rounded-lg"><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3">$</span><input type="number" id="productPrice" placeholder="Precio" min="0" step="0.01" class="w-full pl-7 p-2 border rounded-lg"></div><input type="text" id="productSupplier" placeholder="Proveedor" class="w-full p-2 border rounded-lg"><textarea id="productDescription" placeholder="Descripción" rows="3" class="w-full p-2 border rounded-lg"></textarea><div id="initialStockContainer"><label for="productQuantity" class="block mb-1 font-medium text-sm">Stock Inicial</label><input type="number" id="productQuantity" min="0" value="0" class="w-full p-2 border rounded-lg" required></div></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center justify-center font-semibold">Guardar</button></div></form>
+        </div>
+    </template>
 
-    <!-- Modals -->
-    <div id="modalBackdrop" class="modal-backdrop"></div>
-    <div id="productModal" class="modal w-11/12 md:max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-2xl"></div>
-    <div id="stockModal" class="modal w-11/12 md:max-w-sm bg-white dark:bg-gray-800 rounded-xl shadow-2xl"></div>
-    <div id="historyModal" class="modal w-11/12 md:max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-2xl"></div>
-    <div id="confirmDialog" class="modal w-11/12 max-w-sm p-6 text-center bg-white dark:bg-gray-800 rounded-xl shadow-2xl"></div>
+    <template id="stock-modal-template">
+        <div class="modal w-11/12 md:max-w-sm bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+            <form class="p-6"><h2 class="text-2xl font-bold mb-4">Ajustar Stock</h2><p class="mb-4" id="stockProductName"></p><div class="grid grid-cols-1 gap-4"><select id="movementType" class="w-full p-2 border rounded-lg" required><option value="entrada">Entrada (Compra)</option><option value="salida">Salida (Venta/Ajuste)</option></select><input type="number" id="movementQuantity" placeholder="Cantidad" class="w-full p-2 border rounded-lg" min="1" required><input type="text" id="movementReason" placeholder="Motivo (ej: Venta, Pedido #123)" class="w-full p-2 border rounded-lg" required></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="w-40 h-10 px-4 py-2 bg-green-600 text-white rounded-lg flex items-center justify-center font-semibold">Confirmar</button></div></form>
+        </div>
+    </template>
+
+    <template id="history-modal-template">
+        <div class="modal w-11/12 md:max-w-lg bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+            <div class="p-6"><h2 class="text-2xl font-bold mb-2">Historial de Movimientos</h2><p class="mb-4 text-gray-500" id="historyProductName"></p><div id="historyContent" class="max-h-96 overflow-y-auto pr-2"></div><div class="flex justify-end mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button></div></div>
+        </div>
+    </template>
+
+    <template id="confirm-dialog-template">
+        <div class="modal w-11/12 max-w-sm p-6 text-center bg-white dark:bg-gray-800 rounded-xl shadow-2xl">
+            <i class="fas fa-trash-alt fa-2x text-red-500 mb-4"></i><h3 class="text-lg font-bold mb-2">¿Estás seguro?</h3><p class="mb-6">Esta acción no se puede deshacer.</p><div class="flex justify-center gap-4"><button class="cancel-btn px-6 py-2 bg-gray-200 rounded-lg">Cancelar</button><button class="confirm-delete-btn px-6 py-2 bg-red-600 text-white rounded-lg">Eliminar</button></div>
+        </div>
+    </template>
     
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, updateDoc, deleteDoc, runTransaction, query, getDocs, Timestamp, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
         // --- PASTE YOUR FIREBASE CONFIG HERE ---
         const firebaseConfig = {
-            apiKey: "AIzaSyDqc9O8o1Z5BQXzgVQO6IWzYeGqnapQCTY",
-            authDomain: "inventario-pesca-app.firebaseapp.com",
-            projectId: "inventario-pesca-app",
-            storageBucket: "inventario-pesca-app.firebasestorage.app",
-            messagingSenderId: "252107773486",
-            appId: "1:252107773486:web:561229ba98867ee95571bf",
-            measurementId: "G-VG7VELT7B7"
+          apiKey: "TU_API_KEY", authDomain: "TU_AUTH_DOMAIN", projectId: "TU_PROJECT_ID",
+          storageBucket: "TU_STORAGE_BUCKET", messagingSenderId: "TU_SENDER_ID", appId: "TU_APP_ID"
         };
         // ------------------------------------
 
@@ -110,48 +109,130 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
         
+        // --- Global State ---
+        let productsUnsubscribe = null;
+        let currentOpenModal = null;
+
         // --- DOM Elements ---
         const authContainer = document.getElementById('auth-container');
         const appContainer = document.getElementById('app-container');
-        const loader = document.getElementById('loader');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const authError = document.getElementById('auth-error');
-        const productsGrid = document.getElementById('productsGrid');
-        const noProductsMessage = document.getElementById('noProductsMessage');
         const modalBackdrop = document.getElementById('modalBackdrop');
+        const modalContainer = document.getElementById('modalContainer');
 
-        let productsUnsubscribe = null;
-        let currentOpenModal = null;
-        let deleteResolver = null;
+        // --- Utility Functions ---
+        
+        /**
+         * Toggles a loading state on a button.
+         * @param {HTMLButtonElement} button The button element.
+         * @param {boolean} isLoading True to show loading, false to hide.
+         */
+        function setButtonLoading(button, isLoading) {
+            if (isLoading) {
+                button.disabled = true;
+                button.dataset.originalText = button.innerHTML;
+                button.innerHTML = `<div class="w-5 h-5 border-2 border-white rounded-full animate-spin loading-spinner"></div>`;
+            } else {
+                button.disabled = false;
+                if(button.dataset.originalText) button.innerHTML = button.dataset.originalText;
+            }
+        }
+        
+        /**
+         * Displays a notification message.
+         * @param {string} message The message to display.
+         * @param {'success'|'error'} type The type of notification.
+         */
+        function showNotification(message, type = 'error') {
+            const notification = document.getElementById('notification');
+            const messageP = document.getElementById('notification-message');
+            
+            messageP.textContent = message;
+            notification.classList.toggle('bg-red-600', type === 'error');
+            notification.classList.toggle('bg-green-600', type === 'success');
+            
+            notification.classList.remove('opacity-0', '-translate-y-full');
+            
+            setTimeout(() => {
+                notification.classList.add('opacity-0', '-translate-y-full');
+            }, 3000);
+        }
 
-        // --- Auth State Controller ---
+        /**
+         * Sanitizes text to prevent XSS by replacing HTML characters.
+         * @param {string} str The string to sanitize.
+         * @returns {string} The sanitized string.
+         */
+        function sanitize(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // --- Authentication ---
         onAuthStateChanged(auth, user => {
             if (user) {
                 authContainer.style.display = 'none';
+                if (!appContainer.hasChildNodes()) {
+                    const appTemplate = document.getElementById('app-template');
+                    appContainer.appendChild(appTemplate.content.cloneNode(true));
+                }
                 appContainer.style.display = 'block';
-                document.getElementById('user-email').textContent = user.email;
+                appContainer.querySelector('#user-email').textContent = user.email;
                 initializeAppLogic(user.uid);
             } else {
                 authContainer.style.display = 'flex';
                 appContainer.style.display = 'none';
+                appContainer.innerHTML = '';
                 if (productsUnsubscribe) productsUnsubscribe();
             }
         });
+        
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        document.getElementById('show-register').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'none'; registerForm.style.display = 'block'; });
+        document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'block'; registerForm.style.display = 'none'; });
+        
+        loginForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            setButtonLoading(button, true);
+            try {
+                const email = document.getElementById('login-email').value;
+                const password = document.getElementById('login-password').value;
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch(error) {
+                showNotification(getAuthErrorMessage(error.code));
+            } finally {
+                setButtonLoading(button, false);
+            }
+        });
 
-        // --- Auth Form Logic ---
-        document.getElementById('show-register').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'none'; registerForm.style.display = 'block'; authError.textContent = ''; });
-        document.getElementById('show-login').addEventListener('click', e => { e.preventDefault(); loginForm.style.display = 'block'; registerForm.style.display = 'none'; authError.textContent = ''; });
-        loginForm.addEventListener('submit', e => { e.preventDefault(); const email = document.getElementById('login-email').value; const password = document.getElementById('login-password').value; signInWithEmailAndPassword(auth, email, password).catch(error => authError.textContent = getAuthErrorMessage(error.code)); });
-        registerForm.addEventListener('submit', e => { e.preventDefault(); const email = document.getElementById('register-email').value; const password = document.getElementById('register-password').value; createUserWithEmailAndPassword(auth, email, password).catch(error => authError.textContent = getAuthErrorMessage(error.code)); });
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+        registerForm.addEventListener('submit', async e => {
+            e.preventDefault();
+            const button = e.target.querySelector('button[type="submit"]');
+            setButtonLoading(button, true);
+            try {
+                const email = document.getElementById('register-email').value;
+                const password = document.getElementById('register-password').value;
+                await createUserWithEmailAndPassword(auth, email, password);
+            } catch(error) {
+                showNotification(getAuthErrorMessage(error.code));
+            } finally {
+                setButtonLoading(button, false);
+            }
+        });
         
         function getAuthErrorMessage(code) {
             switch (code) {
-                case 'auth/user-not-found': return 'No se encontró un usuario con ese correo.'; case 'auth/wrong-password': return 'Contraseña incorrecta.'; case 'auth/email-already-in-use': return 'Ese correo electrónico ya está en uso.'; case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.'; case 'auth/invalid-email': return 'El correo electrónico no es válido.'; default: return 'Ocurrió un error. Inténtalo de nuevo.';
+                case 'auth/user-not-found': return 'No se encontró un usuario con ese correo.';
+                case 'auth/wrong-password': return 'Contraseña incorrecta.';
+                case 'auth/email-already-in-use': return 'Ese correo electrónico ya está en uso.';
+                case 'auth/weak-password': return 'La contraseña debe tener al menos 6 caracteres.';
+                case 'auth/invalid-email': return 'El correo electrónico no es válido.';
+                default: return 'Ocurrió un error de autenticación.';
             }
         }
-        
+
         // --- App Logic ---
         function initializeAppLogic(userId) {
             const collectionPath = `users/${userId}/products`;
@@ -160,25 +241,37 @@
             listenForProducts(productsCollectionRef);
         }
 
-        // --- Modal & UI Functions ---
-        function openModal(modalElement) { closeModal(); currentOpenModal = modalElement; modalBackdrop.style.display = 'block'; modalElement.style.display = 'block'; }
-        function closeModal() { if (currentOpenModal) { currentOpenModal.style.display = 'none'; } modalBackdrop.style.display = 'none'; currentOpenModal = null; }
+        // --- UI and Modal Functions ---
+        function openModal(modalElement) { closeModal(); currentOpenModal = modalElement; modalContainer.appendChild(currentOpenModal); modalBackdrop.style.display = 'block'; }
+        function closeModal() { if (currentOpenModal) { currentOpenModal.remove(); } modalBackdrop.style.display = 'none'; currentOpenModal = null; }
+
         function showConfirmDialog() {
-            const dialog = document.getElementById('confirmDialog');
-            dialog.innerHTML = `<i class="fas fa-trash-alt fa-2x text-red-500 mb-4"></i><h3 class="text-lg font-bold mb-2">¿Estás seguro?</h3><p class="mb-6">Esta acción no se puede deshacer.</p><div class="flex justify-center gap-4"><button id="confirmCancelBtn" class="px-6 py-2 bg-gray-200 rounded-lg">Cancelar</button><button id="confirmDeleteBtn" class="px-6 py-2 bg-red-600 text-white rounded-lg">Eliminar</button></div>`;
-            openModal(dialog);
-            document.getElementById('confirmCancelBtn').onclick = () => { if (deleteResolver) deleteResolver(false); closeModal(); };
-            document.getElementById('confirmDeleteBtn').onclick = () => { if (deleteResolver) deleteResolver(true); closeModal(); };
-            return new Promise(resolve => { deleteResolver = resolve; });
+            return new Promise(resolve => {
+                const template = document.getElementById('confirm-dialog-template');
+                const dialog = template.content.cloneNode(true).firstElementChild;
+                dialog.querySelector('.cancel-btn').onclick = () => { resolve(false); closeModal(); };
+                dialog.querySelector('.confirm-delete-btn').onclick = () => { resolve(true); closeModal(); };
+                openModal(dialog);
+            });
         }
         
         function createProductCard(product, collectionRef) {
             const card = document.createElement('div');
             card.className = 'product-card bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 flex flex-col group';
             card.dataset.id = product.id;
-            card.dataset.search = `${product.name} ${product.sku || ''} ${product.category}`.toLowerCase();
+            const searchData = [product.name, product.sku, product.category, product.supplier].join(' ').toLowerCase();
+            card.dataset.search = searchData;
+            
             const stockColor = product.quantity <= 5 ? 'text-red-500' : (product.quantity <= 20 ? 'text-yellow-500' : 'text-green-500');
-            card.innerHTML = `<div class="relative p-4 flex-grow"><div class="absolute top-2 right-2"><div class="relative"><button class="action-toggle-btn text-gray-500 hover:text-gray-700 p-2 rounded-full"><i class="fas fa-ellipsis-v"></i></button><div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 hidden"><a href="#" class="stock-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-exchange-alt fa-fw mr-2"></i>Ajustar Stock</a><a href="#" class="history-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-history fa-fw mr-2"></i>Ver Historial</a><a href="#" class="edit-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-edit fa-fw mr-2"></i>Editar Datos</a><a href="#" class="delete-btn block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-trash-alt fa-fw mr-2"></i>Eliminar</a></div></div></div><h3 class="text-lg font-bold text-gray-900 dark:text-white truncate pr-8">${product.name}</h3><span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold my-2 px-2.5 py-0.5 rounded-full">${product.category}</span><p class="text-sm text-gray-500 dark:text-gray-400 mb-3">SKU: ${product.sku || 'N/A'}</p><div class="flex justify-between items-center text-lg"><span class="font-semibold text-blue-500">$${(product.price || 0).toLocaleString('es-AR')}</span><span class="font-bold ${stockColor}"><i class="fas fa-boxes-stacked mr-1"></i>${product.quantity}</span></div></div>`;
+            
+            card.innerHTML = `<div class="relative p-4 flex-grow"><div class="absolute top-2 right-2"><div class="relative"><button class="action-toggle-btn text-gray-500 hover:text-gray-700 p-2 rounded-full"><i class="fas fa-ellipsis-v"></i></button><div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 hidden"><a href="#" class="stock-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-exchange-alt fa-fw mr-2"></i>Ajustar Stock</a><a href="#" class="history-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-history fa-fw mr-2"></i>Ver Historial</a><a href="#" class="edit-btn block px-4 py-2 text-sm hover:bg-gray-100"><i class="fas fa-edit fa-fw mr-2"></i>Editar Datos</a><a href="#" class="delete-btn block px-4 py-2 text-sm text-red-600 hover:bg-red-50"><i class="fas fa-trash-alt fa-fw mr-2"></i>Eliminar</a></div></div></div><h3 class="text-lg font-bold text-gray-900 dark:text-white truncate pr-8" id="card-name-${product.id}"></h3><span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold my-2 px-2.5 py-0.5 rounded-full" id="card-category-${product.id}"></span><p class="text-sm text-gray-500 dark:text-gray-400 mb-3" id="card-sku-${product.id}"></p><div class="flex justify-between items-center text-lg"><span class="font-semibold text-blue-500" id="card-price-${product.id}"></span><span class="font-bold ${stockColor}" id="card-quantity-${product.id}"><i class="fas fa-boxes-stacked mr-1"></i>${product.quantity}</span></div></div>`;
+            
+            // Use textContent for security
+            card.querySelector(`#card-name-${product.id}`).textContent = product.name;
+            card.querySelector(`#card-category-${product.id}`).textContent = product.category;
+            card.querySelector(`#card-sku-${product.id}`).textContent = `SKU: ${product.sku || 'N/A'}`;
+            card.querySelector(`#card-price-${product.id}`).textContent = `$${(product.price || 0).toLocaleString('es-AR')}`;
+            
             const toggleBtn = card.querySelector('.action-toggle-btn');
             const menu = card.querySelector('.action-menu');
             toggleBtn.addEventListener('click', e => { e.stopPropagation(); menu.style.display = menu.style.display === 'block' ? 'none' : 'block'; });
@@ -190,41 +283,52 @@
         }
 
         function setupAppEventListeners(collectionRef) {
-            document.getElementById('addProductBtn').onclick = () => handleEdit(null, collectionRef);
-            document.getElementById('searchInput').oninput = e => {
+            appContainer.querySelector('#logout-btn').onclick = () => signOut(auth);
+            appContainer.querySelector('#addProductBtn').onclick = () => handleEdit(null, collectionRef);
+            appContainer.querySelector('#searchInput').oninput = e => {
                 const searchTerm = e.target.value.toLowerCase();
-                document.querySelectorAll('.product-card').forEach(card => {
+                appContainer.querySelectorAll('.product-card').forEach(card => {
                     card.style.display = card.dataset.search.includes(searchTerm) ? 'flex' : 'none';
                 });
             };
             modalBackdrop.onclick = closeModal;
-            document.addEventListener('click', () => document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none'));
+            document.addEventListener('click', () => { if(appContainer.querySelector) appContainer.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none')}, true);
         }
 
-        // --- Firestore Listeners ---
+        // --- Firestore ---
         function listenForProducts(collectionRef) {
             if (productsUnsubscribe) productsUnsubscribe();
-            const q = query(collectionRef);
+            
+            const q = query(collectionRef, orderBy("name"));
+            const loader = appContainer.querySelector('#loader');
+            const productsGrid = appContainer.querySelector('#productsGrid');
+            const noProductsMessage = appContainer.querySelector('#noProductsMessage');
+
             loader.style.display = 'block';
             productsUnsubscribe = onSnapshot(q, snapshot => {
                 loader.style.display = 'none';
                 productsGrid.innerHTML = '';
                 noProductsMessage.style.display = snapshot.empty ? 'block' : 'none';
-                let products = [];
-                snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-                products.sort((a, b) => a.name.localeCompare(b.name));
-                products.forEach(product => productsGrid.appendChild(createProductCard(product, collectionRef)));
-            }, error => console.error("Error listening to products:", error));
+                
+                snapshot.forEach(doc => {
+                    const product = { id: doc.id, ...doc.data() };
+                    productsGrid.appendChild(createProductCard(product, collectionRef));
+                });
+            }, error => {
+                console.error("Error listening to products:", error);
+                showNotification('Error al cargar los productos.');
+            });
         }
 
         // --- CRUD Handlers ---
         function handleEdit(product, collectionRef) {
             const isNew = !product;
-            const modal = document.getElementById('productModal');
-            modal.innerHTML = `<form id="productForm" class="p-6"><input type="hidden" id="productId"><h2 id="modalTitle" class="text-2xl font-bold mb-6"></h2><div class="grid grid-cols-1 gap-4"><input type="text" id="productName" placeholder="Nombre del Producto" class="w-full p-2 border rounded-lg" required><select id="productCategory" class="w-full p-2 border rounded-lg" required><option value="" disabled>Seleccione Categoría</option><option value="Cañas">Cañas</option><option value="Reels">Reels</option><option value="Señuelos">Señuelos</option><option value="Líneas y Anzuelos">Líneas y Anzuelos</option><option value="Accesorios">Accesorios</option><option value="Indumentaria">Indumentaria</option><option value="Camping">Camping</option><option value="Otros">Otros</option></select><input type="text" id="productSku" placeholder="SKU / Código" class="w-full p-2 border rounded-lg"><div class="relative"><span class="absolute inset-y-0 left-0 flex items-center pl-3">$</span><input type="number" id="productPrice" placeholder="Precio" min="0" step="0.01" class="w-full pl-7 p-2 border rounded-lg"></div><input type="text" id="productSupplier" placeholder="Proveedor" class="w-full p-2 border rounded-lg"><textarea id="productDescription" placeholder="Descripción" rows="3" class="w-full p-2 border rounded-lg"></textarea><div id="initialStockContainer" class="${isNew ? '' : 'hidden'}"><label for="productQuantity" class="block mb-1 font-medium text-sm">Stock Inicial</label><input type="number" id="productQuantity" min="0" value="0" class="w-full p-2 border rounded-lg" required></div></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg">Guardar</button></div></form>`;
+            const template = document.getElementById('product-modal-template');
+            const modal = template.content.cloneNode(true).firstElementChild;
+            const form = modal.querySelector('form');
             
-            const form = modal.querySelector('#productForm');
             form.querySelector('#modalTitle').textContent = isNew ? "Agregar Nuevo Producto" : "Editar Producto";
+            form.querySelector('#initialStockContainer').style.display = isNew ? 'block' : 'none';
             if (!isNew) {
                 form.querySelector('#productId').value = product.id;
                 form.querySelector('#productName').value = product.name;
@@ -239,7 +343,10 @@
             
             form.onsubmit = async e => {
                 e.preventDefault();
-                const productData = { name: form.querySelector('#productName').value, category: form.querySelector('#productCategory').value, sku: form.querySelector('#productSku').value, price: parseFloat(form.querySelector('#productPrice').value) || 0, supplier: form.querySelector('#productSupplier').value, description: form.querySelector('#productDescription').value };
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(submitBtn, true);
+                const productData = { name: form.querySelector('#productName').value, category: form.querySelector('#productCategory').value, sku: form.querySelector('#productSku').value, price: parseFloat(form.querySelector('#productPrice').value) || 0, quantity: 0, supplier: form.querySelector('#productSupplier').value, description: form.querySelector('#productDescription').value };
+                
                 try {
                     if (isNew) {
                         const initialQuantity = parseInt(form.querySelector('#productQuantity').value, 10);
@@ -247,11 +354,19 @@
                         const newDocRef = await addDoc(collectionRef, productData);
                         const movementRef = collection(db, collectionRef.path, newDocRef.id, 'movements');
                         await addDoc(movementRef, { type: 'inicial', quantityChanged: initialQuantity, newQuantity: initialQuantity, reason: 'Stock Inicial', timestamp: Timestamp.now() });
+                        showNotification('Producto agregado con éxito.', 'success');
                     } else {
+                        delete productData.quantity; // Quantity is not edited directly
                         await updateDoc(doc(db, collectionRef.path, product.id), productData);
+                        showNotification('Producto actualizado con éxito.', 'success');
                     }
                     closeModal();
-                } catch (error) { console.error("Error saving product:", error); }
+                } catch (error) {
+                    console.error("Error saving product:", error);
+                    showNotification('Error al guardar el producto.');
+                } finally {
+                    setButtonLoading(submitBtn, false);
+                }
             };
             modal.querySelector('.cancel-btn').onclick = closeModal;
             openModal(modal);
@@ -261,66 +376,90 @@
             if (await showConfirmDialog()) {
                 try {
                     await deleteDoc(doc(db, collectionRef.path, id));
-                } catch (error) { console.error("Error deleting product:", error); }
+                    showNotification('Producto eliminado.', 'success');
+                } catch (error) { console.error("Error deleting product:", error); showNotification('Error al eliminar el producto.'); }
             }
         }
 
         function handleStockAdjustment(product, collectionRef) {
-            const modal = document.getElementById('stockModal');
-            modal.innerHTML = `<form id="stockForm" class="p-6"><input type="hidden" id="stockProductId"><h2 class="text-2xl font-bold mb-4">Ajustar Stock</h2><p class="mb-4" id="stockProductName"></p><div class="grid grid-cols-1 gap-4"><select id="movementType" class="w-full p-2 border rounded-lg" required><option value="entrada">Entrada (Compra)</option><option value="salida">Salida (Venta/Ajuste)</option></select><input type="number" id="movementQuantity" placeholder="Cantidad" class="w-full p-2 border rounded-lg" min="1" required><input type="text" id="movementReason" placeholder="Motivo (ej: Venta, Pedido #123)" class="w-full p-2 border rounded-lg" required></div><div class="flex justify-end gap-4 mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cancelar</button><button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg">Confirmar</button></div></form>`;
-            const form = modal.querySelector('#stockForm');
-            form.querySelector('#stockProductId').value = product.id;
+            const template = document.getElementById('stock-modal-template');
+            const modal = template.content.cloneNode(true).firstElementChild;
+            const form = modal.querySelector('form');
+
             form.querySelector('#stockProductName').textContent = `Producto: ${product.name} (Stock actual: ${product.quantity})`;
             form.onsubmit = async e => {
                 e.preventDefault();
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                setButtonLoading(submitBtn, true);
                 const quantityChanged = parseInt(form.querySelector('#movementQuantity').value, 10);
-                if (isNaN(quantityChanged) || quantityChanged <= 0) return alert("La cantidad debe ser un número positivo.");
+                if (isNaN(quantityChanged) || quantityChanged <= 0) { showNotification("La cantidad debe ser un número positivo."); setButtonLoading(submitBtn, false); return; }
                 const productRef = doc(db, collectionRef.path, product.id);
                 try {
                     await runTransaction(db, async transaction => {
                         const productDoc = await transaction.get(productRef);
-                        if (!productDoc.exists()) throw "El producto no existe!";
+                        if (!productDoc.exists()) throw new Error("El producto no existe!");
                         const currentQuantity = productDoc.data().quantity;
                         let newQuantity;
                         if (form.querySelector('#movementType').value === 'entrada') {
                             newQuantity = currentQuantity + quantityChanged;
                         } else {
-                            if (currentQuantity < quantityChanged) throw `No hay stock suficiente. Stock actual: ${currentQuantity}.`;
+                            if (currentQuantity < quantityChanged) throw new Error(`No hay stock suficiente. Stock actual: ${currentQuantity}.`);
                             newQuantity = currentQuantity - quantityChanged;
                         }
                         transaction.update(productRef, { quantity: newQuantity });
                         const movementRef = collection(db, productRef.path, 'movements');
                         transaction.set(doc(movementRef), { type: form.querySelector('#movementType').value, quantityChanged, newQuantity, reason: form.querySelector('#movementReason').value, timestamp: Timestamp.now() });
                     });
+                    showNotification('Stock actualizado con éxito.', 'success');
                     closeModal();
-                } catch (error) { alert("Error al ajustar el stock: " + error); }
+                } catch (error) { console.error(error); showNotification(error.message || 'Error al ajustar el stock.');
+                } finally {
+                    setButtonLoading(submitBtn, false);
+                }
             };
             modal.querySelector('.cancel-btn').onclick = closeModal;
             openModal(modal);
         }
 
         async function showHistory(product, collectionRef) {
-            const modal = document.getElementById('historyModal');
-            modal.innerHTML = `<div class="p-6"><h2 class="text-2xl font-bold mb-2">Historial de Movimientos</h2><p class="mb-4 text-gray-500" id="historyProductName"></p><div id="historyContent" class="max-h-96 overflow-y-auto pr-2"></div><div class="flex justify-end mt-6"><button type="button" class="cancel-btn px-4 py-2 bg-gray-200 rounded-lg">Cerrar</button></div></div>`;
+            const template = document.getElementById('history-modal-template');
+            const modal = template.content.cloneNode(true).firstElementChild;
             modal.querySelector('#historyProductName').textContent = product.name;
             const contentDiv = modal.querySelector('#historyContent');
-            contentDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cargando...';
+            contentDiv.innerHTML = '<div class="text-center"><i class="fas fa-spinner fa-spin"></i> Cargando...</div>';
             modal.querySelector('.cancel-btn').onclick = closeModal;
             openModal(modal);
             
-            const movementsRef = collection(db, collectionRef.path, product.id, 'movements');
-            const q = query(movementsRef, orderBy("timestamp", "desc"));
-            const querySnapshot = await getDocs(q);
-            contentDiv.innerHTML = '';
-            if (querySnapshot.empty) { contentDiv.innerHTML = '<p>No hay movimientos registrados.</p>'; return; }
-            querySnapshot.forEach(doc => {
-                const move = doc.data();
-                const moveDate = move.timestamp.toDate().toLocaleString('es-AR');
-                const typeClass = move.type === 'entrada' ? 'text-green-500' : (move.type === 'salida' ? 'text-red-500' : 'text-blue-500');
-                const typeIcon = move.type === 'entrada' ? 'fa-arrow-up' : (move.type === 'salida' ? 'fa-arrow-down' : 'fa-star');
-                const sign = move.type === 'entrada' ? '+' : (move.type === 'salida' ? '-' : '');
-                contentDiv.innerHTML += `<div class="p-3 mb-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg"><div class="flex justify-between items-center"><div class="font-bold ${typeClass}"><i class="fas ${typeIcon} fa-fw mr-2"></i> ${move.type.charAt(0).toUpperCase() + move.type.slice(1)} (${sign}${move.quantityChanged})</div><div class="text-sm text-gray-500">${moveDate}</div></div><p class="text-sm mt-1">Motivo: ${move.reason}</p><p class="text-xs text-right text-gray-400">Stock resultante: ${move.newQuantity}</p></div>`;
-            });
+            try {
+                const movementsRef = collection(db, collectionRef.path, product.id, 'movements');
+                const q = query(movementsRef, orderBy("timestamp", "desc"));
+                const querySnapshot = await getDocs(q);
+                contentDiv.innerHTML = '';
+                if (querySnapshot.empty) { contentDiv.textContent = 'No hay movimientos registrados.'; return; }
+                querySnapshot.forEach(doc => {
+                    const move = doc.data();
+                    const moveDate = move.timestamp.toDate().toLocaleString('es-AR', { dateStyle: 'short', timeStyle: 'short'});
+                    const typeClass = move.type === 'entrada' ? 'text-green-500' : (move.type === 'salida' ? 'text-red-500' : 'text-blue-500');
+                    const typeIcon = move.type === 'entrada' ? 'fa-arrow-up' : (move.type === 'salida' ? 'fa-arrow-down' : 'fa-star');
+                    const sign = move.type === 'entrada' ? '+' : (move.type === 'salida' ? '-' : '');
+                    
+                    const moveDiv = document.createElement('div');
+                    moveDiv.className = "p-3 mb-2 bg-gray-50 dark:bg-gray-700/50 rounded-lg";
+                    moveDiv.innerHTML = `<div class="flex justify-between items-center"><div class="font-bold ${typeClass}"><i class="fas ${typeIcon} fa-fw mr-2"></i> <span id="move-type"></span> (<span id="move-quantity"></span>)</div><div class="text-sm text-gray-500" id="move-date"></div></div><p class="text-sm mt-1">Motivo: <span id="move-reason"></span></p><p class="text-xs text-right text-gray-400">Stock resultante: <span id="move-new-quantity"></span></p>`;
+                    
+                    // Use textContent for security
+                    moveDiv.querySelector('#move-type').textContent = move.type.charAt(0).toUpperCase() + move.type.slice(1);
+                    moveDiv.querySelector('#move-quantity').textContent = `${sign}${move.quantityChanged}`;
+                    moveDiv.querySelector('#move-date').textContent = moveDate;
+                    moveDiv.querySelector('#move-reason').textContent = move.reason;
+                    moveDiv.querySelector('#move-new-quantity').textContent = move.newQuantity;
+
+                    contentDiv.appendChild(moveDiv);
+                });
+            } catch (error) {
+                console.error("Error fetching history:", error);
+                contentDiv.textContent = 'Error al cargar el historial.';
+            }
         }
     </script>
 </body>
