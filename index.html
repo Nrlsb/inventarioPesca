@@ -465,10 +465,10 @@
                 setButtonLoading(button, true);
 
                 const type = modal.querySelector('#movementType').value;
-                const quantity = parseInt(modal.querySelector('#movementQuantity').value);
+                const quantityChanged = parseInt(modal.querySelector('#movementQuantity').value);
                 const reason = modal.querySelector('#movementReason').value;
 
-                if (isNaN(quantity) || quantity <= 0) {
+                if (isNaN(quantityChanged) || quantityChanged <= 0) {
                     showNotification('La cantidad debe ser un número positivo.');
                     setButtonLoading(button, false);
                     return;
@@ -479,25 +479,32 @@
                     await runTransaction(db, async (transaction) => {
                         const productDoc = await transaction.get(productRef);
                         if (!productDoc.exists()) { throw "El documento no existe!"; }
+                        
                         const currentQuantity = productDoc.data().quantity || 0;
                         let newQuantity = currentQuantity;
                         
                         if (type === 'entrada') {
-                            newQuantity += quantity;
+                            newQuantity += quantityChanged;
                         } else {
-                            if (currentQuantity < quantity) { throw "No hay stock suficiente para esta salida."; }
-                            newQuantity -= quantity;
+                            if (currentQuantity < quantityChanged) { throw "No hay stock suficiente para esta salida."; }
+                            newQuantity -= quantityChanged;
                         }
 
                         transaction.update(productRef, { quantity: newQuantity });
                         
-                        const historyCollectionRef = collection(db, `${productRef.path}/movements`);
-                        transaction.set(doc(historyCollectionRef), {
-                            type, quantity, reason,
+                        // --- CAMBIO 1: Nombre de la colección de 'history' a 'movements' ---
+                        const movementsCollectionRef = collection(db, `${productRef.path}/movements`);
+                        
+                        // --- CAMBIO 2: Campos del objeto de historial alineados con las reglas ---
+                        const movementData = {
+                            type, 
+                            quantityChanged, 
+                            reason,
                             previousStock: currentQuantity,
-                            newStock: newQuantity,
-                            date: Timestamp.now(),
-                        });
+                            newQuantity: newQuantity,
+                            timestamp: Timestamp.now(), // Se cambió 'date' por 'timestamp'
+                        };
+                        transaction.set(doc(movementsCollectionRef), movementData);
                     });
                     showNotification('Stock actualizado con éxito.', 'success');
                     closeModal();
@@ -538,13 +545,14 @@
             modal.querySelector('.cancel-btn').onclick = closeModal;
             openModal(modal);
 
-            const historyCollectionRef = collection(db, `users/${userId}/products/${product.id}/history`);
+            // --- CAMBIO 3: Nombre de la colección de 'history' a 'movements' ---
+            const movementsCollectionRef = collection(db, `users/${userId}/products/${product.id}/movements`);
             let lastVisibleDoc = null; 
 
             const loadMoreHistory = async () => {
                 loadMoreContainer.innerHTML = '<i class="fas fa-spinner fa-spin fa-lg text-blue-500"></i>';
 
-                let q = query(historyCollectionRef, orderBy("date", "desc"), limit(HISTORY_PAGE_SIZE));
+                let q = query(movementsCollectionRef, orderBy("timestamp", "desc"), limit(HISTORY_PAGE_SIZE));
                 if (lastVisibleDoc) {
                     q = query(q, startAfter(lastVisibleDoc));
                 }
@@ -559,15 +567,16 @@
 
                     querySnapshot.forEach(doc => {
                         const item = doc.data();
-                        const date = item.date.toDate().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
+                        const date = item.timestamp.toDate().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'short' });
                         const typeClass = item.type === 'entrada' ? 'text-green-500' : 'text-red-500';
                         const typeText = item.type === 'entrada' ? 'Entrada' : 'Salida';
                         const row = tbody.insertRow();
                         row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
+                        // --- CAMBIO 4: Se lee de 'quantityChanged' en lugar de 'quantity' ---
                         row.innerHTML = `
                             <td class="px-4 py-2">${date}</td>
                             <td class="px-4 py-2 font-medium ${typeClass}">${typeText}</td>
-                            <td class="px-4 py-2 font-bold">${item.quantity}</td>
+                            <td class="px-4 py-2 font-bold">${item.quantityChanged}</td>
                             <td class="px-4 py-2">${item.reason}</td>
                         `;
                     });
