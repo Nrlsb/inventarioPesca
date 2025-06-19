@@ -1,0 +1,38 @@
+/* Estilos base y para componentes personalizados */
+body { 
+    font-family: 'Inter', sans-serif; 
+}
+.modal-backdrop { 
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.5); 
+    z-index: 40; 
+}
+.modal { 
+    display: none; 
+    position: fixed; 
+    top: 50%; 
+    left: 50%; 
+    transform: translate(-50%, -50%); 
+    z-index: 50; 
+}
+.action-menu { 
+    display: none; 
+}
+/* Mostrar menú de acciones al pasar el cursor sobre el grupo */
+.group:hover .action-menu { 
+    display: block; 
+}
+#auth-container, #app-container { 
+    display: none; 
+}
+.loading-spinner { 
+    border-top-color: transparent; 
+}
+.notification { 
+    transition: opacity 0.5s, transform 0.5s; 
+}
