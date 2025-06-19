@@ -3,13 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO -->
+    <meta name="description" content="Una aplicación web para gestionar tu inventario de artículos de pesca. Registra tus cañas, reels, señuelos y más, de forma fácil y segura.">
+    
+    <!-- Preconnect to required origins for performance -->
+    <link rel="preconnect" href="https://inventario-pesca-app.firebaseapp.com">
+    <link rel="preconnect" href="https://apis.google.com">
+    
     <title>Inventario de Pesca - App Segura</title>
+    
     <!-- Tailwind CSS para estilos rápidos y responsivos -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts para una tipografía limpia -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome para íconos -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts para una tipografía limpia (carga asíncrona) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"></noscript>
+    
+    <!-- Font Awesome para íconos (carga asíncrona) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+
     <style>
         /* Estilos base y para componentes personalizados */
         body { font-family: 'Inter', sans-serif; }
@@ -74,8 +88,8 @@
                         <i class="fas fa-fish-fins mr-3 text-blue-500"></i>Inventario de Pesca
                     </h1>
                     <div class="text-right w-full sm:w-auto">
-                        <p id="user-email" class="text-sm text-gray-500 dark:text-gray-400 truncate"></p>
-                        <button id="logout-btn" class="text-sm text-red-500 hover:underline">Cerrar Sesión</button>
+                        <p id="user-email" class="text-sm text-gray-700 dark:text-gray-400 truncate"></p>
+                        <button id="logout-btn" class="text-sm text-red-600 hover:underline">Cerrar Sesión</button>
                     </div>
                 </div>
             </header>
@@ -290,9 +304,9 @@
             card.innerHTML = `
                 <div>
                     <div class="flex justify-between items-start">
-                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-500 dark:text-blue-400">${product.category || 'Sin Categoría'}</span>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400">${product.category || 'Sin Categoría'}</span>
                         <div class="relative">
-                            <button class="menu-button text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
+                            <button aria-label="Opciones del producto" class="menu-button text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 focus:outline-none">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="action-menu absolute right-0 mt-2 w-48 bg-white dark:bg-gray-700 rounded-md shadow-lg z-10 py-1">
@@ -303,7 +317,7 @@
                             </div>
                         </div>
                     </div>
-                    <h3 class="text-lg font-bold mt-2 text-gray-900 dark:text-white">${product.name}</h3>
+                    <h2 class="text-lg font-bold mt-2 text-gray-900 dark:text-white">${product.name}</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">${product.sku || 'Sin SKU'}</p>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">${product.description || 'Sin descripción.'}</p>
                 </div>
@@ -492,17 +506,15 @@
 
                         transaction.update(productRef, { quantity: newQuantity });
                         
-                        // --- CAMBIO 1: Nombre de la colección de 'history' a 'movements' ---
                         const movementsCollectionRef = collection(db, `${productRef.path}/movements`);
                         
-                        // --- CAMBIO 2: Campos del objeto de historial alineados con las reglas ---
                         const movementData = {
                             type, 
                             quantityChanged, 
                             reason,
                             previousStock: currentQuantity,
                             newQuantity: newQuantity,
-                            timestamp: Timestamp.now(), // Se cambió 'date' por 'timestamp'
+                            timestamp: Timestamp.now(),
                         };
                         transaction.set(doc(movementsCollectionRef), movementData);
                     });
@@ -545,7 +557,6 @@
             modal.querySelector('.cancel-btn').onclick = closeModal;
             openModal(modal);
 
-            // --- CAMBIO 3: Nombre de la colección de 'history' a 'movements' ---
             const movementsCollectionRef = collection(db, `users/${userId}/products/${product.id}/movements`);
             let lastVisibleDoc = null; 
 
@@ -572,7 +583,6 @@
                         const typeText = item.type === 'entrada' ? 'Entrada' : 'Salida';
                         const row = tbody.insertRow();
                         row.className = 'bg-white border-b dark:bg-gray-800 dark:border-gray-700';
-                        // --- CAMBIO 4: Se lee de 'quantityChanged' en lugar de 'quantity' ---
                         row.innerHTML = `
                             <td class="px-4 py-2">${date}</td>
                             <td class="px-4 py-2 font-medium ${typeClass}">${typeText}</td>
